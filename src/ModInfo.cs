@@ -23,6 +23,6 @@ internal static class ModInfo
             .GetCustomAttributes<AssemblyMetadataAttribute>()
             .FirstOrDefault(a => a.Key == key);
 
-        return attribute?.Value ?? "unknown";
+        return attribute?.Value ?? string.Empty;
     }
 }
