@@ -25,7 +25,7 @@
 	<!-- Build Metadata -->
 	<PropertyGroup>
 		<CommitHash Condition="'$(CommitHash)' == ''">unknown</CommitHash>
-		<BuildDate>$([System.DateTime]::UtcNow.ToString("MM.dd.yyyy HH:mm"))</BuildDate>
+		<BuildDate>$([System.DateTime]::UtcNow.ToString("MM.dd.yyyy"))</BuildDate>
 	</PropertyGroup>
 
 	<!-- Target to add assembly metadata (runs AFTER GetGitCommitHash) -->
