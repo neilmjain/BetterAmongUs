@@ -35,22 +35,36 @@ internal abstract class RPCHandler
 
         foreach (var handler in allHandlers)
         {
-            if (calledId == handler.CallId && handlerFlag != HandlerFlag.HandleGameDataTag)
+            if (handlerFlag != HandlerFlag.HandleGameDataTag && calledId == handler.CallId)
             {
                 try
                 {
-                    if (handlerFlag == HandlerFlag.Handle) handler.Handle(sender, reader);
-                    else if (handlerFlag == HandlerFlag.AntiCheatCancel) cancel = !handler.HandleAntiCheatCancel(sender, reader);
-                    else if (handlerFlag == HandlerFlag.AntiCheat) handler.HandleAntiCheat(sender, reader);
-                    else if (handlerFlag == HandlerFlag.CheatRpcCheck) handler.HandleCheatRpcCheck(sender, reader);
-                    else if (handlerFlag == HandlerFlag.BetterHost) cancel = !handler.BetterHandle(sender, reader);
+                    switch (handlerFlag)
+                    {
+                        case HandlerFlag.Handle:
+                            handler.Handle(sender, reader);
+                            break;
+                        case HandlerFlag.AntiCheatCancel:
+                            cancel = !handler.HandleAntiCheatCancel(sender, reader);
+                            break;
+                        case HandlerFlag.AntiCheat:
+                            handler.HandleAntiCheat(sender, reader);
+                            break;
+                        case HandlerFlag.CheatRpcCheck:
+                            handler.HandleCheatRpcCheck(sender, reader);
+                            break;
+                        case HandlerFlag.BetterHost:
+                            cancel = !handler.BetterHandle(sender, reader);
+                            break;
+                    }
+
                     if (!cancel) break;
                 }
                 catch
                 {
                 }
             }
-            else if (calledId == handler.GameDataTag && handlerFlag == HandlerFlag.HandleGameDataTag)
+            else if (handlerFlag == HandlerFlag.HandleGameDataTag && calledId == handler.GameDataTag)
             {
                 try
                 {
