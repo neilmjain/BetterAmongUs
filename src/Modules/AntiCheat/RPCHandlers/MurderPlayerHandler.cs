@@ -1,6 +1,6 @@
 using AmongUs.GameOptions;
-using BetterAmongUs.Helpers;
 using BetterAmongUs.Attributes;
+using BetterAmongUs.Helpers;
 using BetterAmongUs.Managers;
 using BetterAmongUs.Mono;
 using Hazel;
@@ -24,7 +24,7 @@ internal sealed class MurderPlayerHandler : RPCHandler
             {
                 target.BetterData().AntiCheatInfo.TimesAttemptedKilled++;
 
-                if (target.BetterData().AntiCheatInfo.TimesAttemptedKilled >= 5 && !target.IsAlive())
+                if (target.BetterData().AntiCheatInfo.TimesAttemptedKilled >= 10 && !target.IsAlive())
                 {
                     if (BetterNotificationManager.NotifyCheat(player, string.Format(Translator.GetString("AntiCheat.InvalidAction"), Translator.GetString("AntiCheat.TryBanExploit"))))
                     {

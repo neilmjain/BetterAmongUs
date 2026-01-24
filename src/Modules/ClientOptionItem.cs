@@ -4,14 +4,37 @@ using Object = UnityEngine.Object;
 
 namespace BetterAmongUs.Modules;
 
+/// <summary>
+/// Represents a customizable client option item that can be toggled in the options menu.
+/// </summary>
 internal sealed class ClientOptionItem
 {
-    internal ConfigEntry<bool>? Config;
-    internal ToggleButtonBehaviour ToggleButton;
+    /// <summary>
+    /// Gets or sets the configuration entry associated with this option.
+    /// </summary>
+    internal ConfigEntry<bool>? Config { get; set; }
 
-    internal static SpriteRenderer? CustomBackground;
+    /// <summary>
+    /// Gets or sets the toggle button behavior for this option.
+    /// </summary>
+    internal ToggleButtonBehaviour ToggleButton { get; set; }
+
+    /// <summary>
+    /// Gets or sets the custom background for BetterAmongUs options.
+    /// </summary>
+    internal static SpriteRenderer? CustomBackground { get; set; }
+
     private static int numOptions = 0;
 
+    /// <summary>
+    /// Initializes a new instance of the ClientOptionItem class.
+    /// </summary>
+    /// <param name="name">The display name of the option.</param>
+    /// <param name="config">The configuration entry for this option.</param>
+    /// <param name="optionsMenuBehaviour">The options menu behavior instance.</param>
+    /// <param name="additionalOnClickAction">Additional action to perform on click.</param>
+    /// <param name="toggleCheck">Function to check if the toggle can be interacted with.</param>
+    /// <param name="IsToggle">Whether this is a toggle option or a button.</param>
     internal ClientOptionItem(string name, ConfigEntry<bool>? config, OptionsMenuBehaviour optionsMenuBehaviour, Action? additionalOnClickAction = null, Func<bool>? toggleCheck = null, bool IsToggle = true)
     {
         try
@@ -20,7 +43,7 @@ internal sealed class ClientOptionItem
 
             var mouseMoveToggle = optionsMenuBehaviour.DisableMouseMovement;
 
-            // 1つ目のボタンの生成時に背景も生成
+            // Initialize custom background on first creation
             if (CustomBackground == null)
             {
                 numOptions = 0;
@@ -30,6 +53,7 @@ internal sealed class ClientOptionItem
                 CustomBackground.transform.localPosition += Vector3.back * 8;
                 CustomBackground.gameObject.SetActive(false);
 
+                // Create back button
                 var closeButton = Object.Instantiate(mouseMoveToggle, CustomBackground.transform);
                 closeButton.transform.localPosition = new(1.3f, -2.3f, -6f);
                 closeButton.name = "Back";
@@ -42,6 +66,7 @@ internal sealed class ClientOptionItem
                     CustomBackground.gameObject.SetActive(false);
                 }));
 
+                // Find existing UI elements
                 var selectableButtons = optionsMenuBehaviour.ControllerSelectable;
                 PassiveButton? leaveButton = null;
                 PassiveButton? returnButton = null;
@@ -54,8 +79,9 @@ internal sealed class ClientOptionItem
                     else if (button.name == "ReturnToGameButton")
                         returnButton = button.GetComponent<PassiveButton>();
                 }
-                var generalTab = mouseMoveToggle.transform.parent.parent.parent;
 
+                // Create main mod options button
+                var generalTab = mouseMoveToggle.transform.parent.parent.parent;
                 var modOptionsButton = Object.Instantiate(mouseMoveToggle, generalTab);
                 modOptionsButton.transform.localPosition = leaveButton?.transform?.localPosition ?? new(0f, -2.4f, 1f);
                 modOptionsButton.name = "Better Options";
@@ -68,12 +94,14 @@ internal sealed class ClientOptionItem
                     CustomBackground.gameObject.SetActive(true);
                 }));
 
+                // Reposition existing buttons
                 if (leaveButton != null)
                     leaveButton.transform.localPosition = new(-1.35f, -2.411f, -1f);
                 if (returnButton != null)
                     returnButton.transform.localPosition = new(1.35f, -2.411f, -1f);
             }
 
+            // Create this specific option button
             ToggleButton = Object.Instantiate(mouseMoveToggle, CustomBackground.transform);
             ToggleButton.transform.localPosition = new Vector3(
                 numOptions % 2 == 0 ? -1.3f : 1.3f,
@@ -86,6 +114,7 @@ internal sealed class ClientOptionItem
             var passiveButton = ToggleButton.GetComponent<PassiveButton>();
             passiveButton.OnClick = new();
 
+            // Handle non-toggle button
             if (IsToggle == false)
             {
                 ToggleButton.Text.text = name;
@@ -94,7 +123,7 @@ internal sealed class ClientOptionItem
 
                 passiveButton.OnClick.AddListener(new Action(() =>
                 {
-                    if (toggleCheck() == false)
+                    if (toggleCheck?.Invoke() == false)
                     {
                         return;
                     }
@@ -105,9 +134,10 @@ internal sealed class ClientOptionItem
                 return;
             }
 
+            // Handle toggle button
             passiveButton.OnClick.AddListener(new Action(() =>
             {
-                if (toggleCheck() == false)
+                if (toggleCheck?.Invoke() == false)
                 {
                     return;
                 }
@@ -116,11 +146,25 @@ internal sealed class ClientOptionItem
                 UpdateToggle();
                 additionalOnClickAction?.Invoke();
             }));
+
             UpdateToggle();
         }
-        finally { numOptions++; }
+        finally
+        {
+            numOptions++;
+        }
     }
 
+    /// <summary>
+    /// Factory method to create a new ClientOptionItem.
+    /// </summary>
+    /// <param name="name">The display name of the option.</param>
+    /// <param name="config">The configuration entry for this option.</param>
+    /// <param name="optionsMenuBehaviour">The options menu behavior instance.</param>
+    /// <param name="additionalOnClickAction">Additional action to perform on click.</param>
+    /// <param name="toggleCheck">Function to check if the toggle can be interacted with.</param>
+    /// <param name="IsToggle">Whether this is a toggle option or a button.</param>
+    /// <returns>A new ClientOptionItem instance.</returns>
     internal static ClientOptionItem Create(string name, ConfigEntry<bool>? config, OptionsMenuBehaviour optionsMenuBehaviour, Action? additionalOnClickAction = null, Func<bool>? toggleCheck = null, bool IsToggle = true)
     {
         toggleCheck ??= () => true;
@@ -128,12 +172,20 @@ internal sealed class ClientOptionItem
         return new ClientOptionItem(name, config, optionsMenuBehaviour, additionalOnClickAction, toggleCheck, IsToggle);
     }
 
+    /// <summary>
+    /// Updates the visual state of the toggle button based on the configuration value.
+    /// </summary>
     internal void UpdateToggle()
     {
         if (ToggleButton == null) return;
 
-        var color = Config != null && Config.Value ? new Color32(0, 150, 0, byte.MaxValue) : new Color32(77, 77, 77, byte.MaxValue);
-        var textColor = Config != null && Config.Value ? new Color(1f, 1f, 1f, 1f) : new Color(1f, 1f, 1f, 0.5f);
+        var color = Config != null && Config.Value ?
+            new Color32(0, 150, 0, byte.MaxValue) :
+            new Color32(77, 77, 77, byte.MaxValue);
+        var textColor = Config != null && Config.Value ?
+            new Color(1f, 1f, 1f, 1f) :
+            new Color(1f, 1f, 1f, 0.5f);
+
         ToggleButton.Background.color = color;
         ToggleButton.Rollover?.ChangeOutColor(color);
         ToggleButton.Text.color = textColor;

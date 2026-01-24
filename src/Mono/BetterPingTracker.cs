@@ -7,11 +7,26 @@ using static BetterAmongUs.Patches.Gameplay.LobbyPatch;
 
 namespace BetterAmongUs.Mono;
 
+/// <summary>
+/// Provides enhanced ping tracking and display functionality with additional information.
+/// Extends the default Among Us ping tracker with custom features.
+/// </summary>
 internal sealed class BetterPingTracker : MonoBehaviour
 {
+    /// <summary>
+    /// Gets the singleton instance of the BetterPingTracker.
+    /// </summary>
+    /// <value>The current instance, or null if not initialized.</value>
     internal static BetterPingTracker? Instance { get; private set; }
+
     private AspectPosition? aspectPosition;
     private TextMeshPro? text;
+
+    /// <summary>
+    /// Initializes the BetterPingTracker with the required UI components.
+    /// </summary>
+    /// <param name="pingText">The TextMeshPro component for displaying ping information.</param>
+    /// <param name="pingAspectPosition">The AspectPosition component for positioning the display.</param>
     internal void SetUp(TextMeshPro pingText, AspectPosition pingAspectPosition)
     {
         if (Instance != null) return;
@@ -26,6 +41,9 @@ internal sealed class BetterPingTracker : MonoBehaviour
         aspectPosition = pingAspectPosition;
     }
 
+    /// <summary>
+    /// Updates the ping tracker display every frame.
+    /// </summary>
     private void Update()
     {
         if (aspectPosition == null || text == null) return;

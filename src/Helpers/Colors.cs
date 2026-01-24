@@ -2,6 +2,9 @@
 
 namespace BetterAmongUs.Helpers;
 
+/// <summary>
+/// Provides extension methods and utilities for working with colors in Unity.
+/// </summary>
 internal static class Colors
 {
     // Convert a string to a colored string using a Unity Color object
@@ -70,6 +73,11 @@ internal static class Colors
         return new Color32(r, g, b, 255);
     }
 
+    /// <summary>
+    /// Converts a Unity Color object to a Color32 object.
+    /// </summary>
+    /// <param name="color">The Color object to convert.</param>
+    /// <returns>A Color32 object representing the input color.</returns>
     internal static Color32 ColorToColor32(this Color color)
     {
         return new Color32(
@@ -80,6 +88,14 @@ internal static class Colors
         );
     }
 
+    /// <summary>
+    /// Linearly interpolates between multiple colors based on a value within a specified range.
+    /// </summary>
+    /// <param name="colors">The array of colors to interpolate between.</param>
+    /// <param name="lerpRange">The minimum and maximum range for the interpolation value.</param>
+    /// <param name="t">The interpolation value within the specified range.</param>
+    /// <param name="reverse">Whether to reverse the color array order.</param>
+    /// <returns>The interpolated color.</returns>
     internal static Color LerpColor(this Color[] colors, (float min, float max) lerpRange, float t, bool reverse = false)
     {
         float normalizedT = Mathf.InverseLerp(lerpRange.min, lerpRange.max, t);
@@ -104,6 +120,13 @@ internal static class Colors
         return Color.Lerp(colors[segmentIndex], colors[segmentIndex + 1], segmentT);
     }
 
+    /// <summary>
+    /// Standard crewmate blue color.
+    /// </summary>
     internal static readonly Color CrewmateBlue = new Color32(140, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+
+    /// <summary>
+    /// Standard impostor red color.
+    /// </summary>
     internal static readonly Color ImpostorRed = new Color32(byte.MaxValue, 25, 25, byte.MaxValue);
 }

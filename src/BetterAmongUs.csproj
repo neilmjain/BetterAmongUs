@@ -9,11 +9,7 @@
 
 	<!-- Git Commit Hash Retrieval -->
 	<Target Name="GetGitCommitHash" BeforeTargets="BeforeBuild">
-		<Exec Command="git rev-parse --short HEAD"
-			  ConsoleToMSBuild="true"
-			  IgnoreExitCode="true"
-			  StandardErrorImportance="low"
-			  WorkingDirectory="$(MSBuildProjectDirectory)">
+		<Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" IgnoreExitCode="true" StandardErrorImportance="low" WorkingDirectory="$(MSBuildProjectDirectory)">
 			<Output TaskParameter="ConsoleOutput" PropertyName="CommitHash" />
 		</Exec>
 		<PropertyGroup Condition="'$(CommitHash)' == ''">
@@ -64,23 +60,15 @@
 	</Target>
 
 	<!-- Copy Mod to Game Folder -->
-	<Target Name="CopyModToGame" AfterTargets="PostBuildEvent"
-			Condition="'$(CopyToGame)' == 'true'"
-			DependsOnTargets="ReadGamePath">
+	<Target Name="CopyModToGame" AfterTargets="PostBuildEvent" Condition="'$(CopyToGame)' == 'true'" DependsOnTargets="ReadGamePath">
 
-		<Copy SourceFiles="$(TargetDir)$(AssemblyName).dll"
-			  DestinationFolder="$(GamePath)"
-			  SkipUnchangedFiles="true"
-			  Condition="'$(GamePath)' != '' and Exists('$(GamePath)')">
+		<Copy SourceFiles="$(TargetDir)$(AssemblyName).dll" DestinationFolder="$(GamePath)" SkipUnchangedFiles="true" Condition="'$(GamePath)' != '' and Exists('$(GamePath)')">
 			<Output TaskParameter="CopiedFiles" ItemName="CopiedMods" />
 		</Copy>
 
-		<Message Text="Successfully copied mod to: $(GamePath)"
-				 Importance="high"
-				 Condition="'@(CopiedMods)' != ''" />
+		<Message Text="Successfully copied mod to: $(GamePath)" Importance="high" Condition="'@(CopiedMods)' != ''" />
 
-		<Warning Text="Game path not found. Create $(ModPathFile) with game folder path."
-				 Condition="'$(CopyToGame)' == 'true' and ('$(GamePath)' == '' or !Exists('$(GamePath)'))" />
+		<Warning Text="Game path not found. Create $(ModPathFile) with game folder path." Condition="'$(CopyToGame)' == 'true' and ('$(GamePath)' == '' or !Exists('$(GamePath)'))" />
 	</Target>
 
 	<!-- NuGet Packages -->
