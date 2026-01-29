@@ -118,9 +118,8 @@ public static class BAUModdedSupport
 
     /// <summary>
     /// Attempts to extract BAUFlags from a loaded plugin's fields.
-    /// This method is called automatically when a new plugin is loaded.
     /// </summary>
-    /// <param name="plugin">The plugin instance that was loaded.</param>
+    /// <param name="plugin">The plugin instance.</param>
     private static void TryGetFlags(BasePlugin plugin)
     {
         foreach (var field in plugin.GetType().GetFields())
@@ -169,7 +168,7 @@ public static class BAUModdedSupport
     /// </summary>
     /// <param name="flag">The flag to check for presence in the collected flags.</param>
     /// <returns>True if the flag is present, false otherwise.</returns>
-    internal static bool HasFlag(string flag)
+    public static bool HasFlag(string flag)
     {
         return _flags.Contains(flag);
     }
