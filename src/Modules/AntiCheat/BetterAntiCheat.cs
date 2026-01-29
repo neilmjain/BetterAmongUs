@@ -71,7 +71,7 @@ internal static class BetterAntiCheat
         [HarmonyPostfix]
         internal static void Deserialize_Postfix(PlatformSpecificData __instance)
         {
-            if (!BAUPlugin.AntiCheat.Value || !GameState.IsVanillaServer) return;
+            if (!BAUPlugin.AntiCheat.Value || BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_Anticheat) || !GameState.IsVanillaServer) return;
 
             if (GameState.IsLobby)
             {
@@ -149,7 +149,7 @@ internal static class BetterAntiCheat
     internal static void CheckRPC(PlayerControl player, byte callId, MessageReader oldReader)
     {
         if (player == null || player?.Data == null) return;
-        if (!IsEnabled || !BAUPlugin.AntiCheat.Value || !BetterGameSettings.DetectInvalidRPCs.GetBool()) return;
+        if (!IsEnabled || !BAUPlugin.AntiCheat.Value || BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_Anticheat) || !BetterGameSettings.DetectInvalidRPCs.GetBool()) return;
         if (player.IsLocalPlayer() && player.IsHost()) return;
 
         MessageReader reader = MessageReader.Get(oldReader);
@@ -169,7 +169,7 @@ internal static class BetterAntiCheat
         try
         {
             if (player == null || player?.Data == null) return true;
-            if (!IsEnabled || !BAUPlugin.AntiCheat.Value || !BetterGameSettings.DetectInvalidRPCs.GetBool()) return true;
+            if (!IsEnabled || !BAUPlugin.AntiCheat.Value || BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_Anticheat) || !BetterGameSettings.DetectInvalidRPCs.GetBool()) return true;
             if (player.IsLocalPlayer() && player.IsHost()) return true;
 
             MessageReader reader = MessageReader.Get(oldReader);

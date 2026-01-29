@@ -1,5 +1,6 @@
 ﻿using BetterAmongUs.Helpers;
 using BetterAmongUs.Managers;
+using BetterAmongUs.Modules;
 using BetterAmongUs.Modules.AntiCheat;
 using HarmonyLib;
 using UnityEngine;
@@ -9,6 +10,8 @@ namespace BetterAmongUs.Patches.Client.Managers;
 [HarmonyPatch]
 internal static class ModManagerPatch
 {
+    private static SpriteRenderer? modStamp;
+
     [HarmonyPatch(typeof(ModManager), nameof(ModManager.LateUpdate))]
     [HarmonyPostfix]
     private static void LateUpdate_Postfix(ModManager __instance)
@@ -19,7 +22,19 @@ internal static class ModManagerPatch
         }
 
         if (__instance.ModStamp.gameObject.active == true)
-            __instance.ModStamp.GetComponent<SpriteRenderer>().sprite = Utils.LoadSprite("BetterAmongUs.Resources.Images.BetterAmongUs-Mod.png", 250f);
+        {
+            if (modStamp == null)
+            {
+                modStamp = __instance.ModStamp.GetComponent<SpriteRenderer>();
+            }
+            else
+            {
+                if (!BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_CustomModStamp))
+                {
+                    modStamp.sprite = Utils.LoadSprite("BetterAmongUs.Resources.Images.BetterAmongUs-Mod.png", 250f);
+                }
+            }
+        }
 
         BetterAntiCheat.Update();
         LateTask.UpdateAll(Time.deltaTime);

@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BetterAmongUs.Modules;
+using HarmonyLib;
 using UnityEngine;
 
 namespace BetterAmongUs.Patches.Gameplay.UI.Settings;
@@ -10,6 +11,8 @@ internal static class NumberOptionPatch
     [HarmonyPrefix]
     private static bool NumberOption_Increase_Prefix(NumberOption __instance)
     {
+        if (BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_AllGameSettings)) return true;
+
         int times = 1;
         if (Input.GetKey(KeyCode.LeftShift))
             times = 5;
@@ -34,6 +37,8 @@ internal static class NumberOptionPatch
     [HarmonyPrefix]
     private static bool NumberOption_Decrease_Prefix(NumberOption __instance)
     {
+        if (BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_AllGameSettings)) return true;
+
         int times = 1;
         if (Input.GetKey(KeyCode.LeftShift))
             times = 5;

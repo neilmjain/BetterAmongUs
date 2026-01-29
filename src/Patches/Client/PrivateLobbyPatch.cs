@@ -17,6 +17,12 @@ internal static class PrivateLobbyPatch
     [HarmonyPostfix]
     private static void CreateGameOptions_Show_Postfix(CreateGameOptions __instance)
     {
+        if (BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_PrivateLobby))
+        {
+            BAUPlugin.PrivateOnlyLobby.Value = false;
+            return;
+        }
+
         if (toggle != null) return;
         buttons.Clear();
 

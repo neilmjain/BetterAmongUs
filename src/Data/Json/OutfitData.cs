@@ -51,7 +51,7 @@ internal sealed class OutfitData
     /// <summary>
     /// Initializes the outfit data system and sets up change listeners.
     /// </summary>
-    internal static void Init()
+    internal static void Initialize()
     {
         FindPreset();
 

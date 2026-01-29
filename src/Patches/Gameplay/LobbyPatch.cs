@@ -55,8 +55,11 @@ internal static class LobbyPatch
         __instance.ClientViewButton?.gameObject?.SetUIColors("Icon");
         __instance.HostViewButton?.gameObject?.SetUIColors("Icon");
 
-        __instance.StartButton?.transform?.SetParent(__instance.HostInfoPanel?.transform);
-        __instance.StartButtonClient?.transform?.SetParent(__instance.HostInfoPanel?.transform);
+        if (!BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_BetterPingTracker))
+        {
+            __instance.StartButton?.transform?.SetParent(__instance.HostInfoPanel?.transform);
+            __instance.StartButtonClient?.transform?.SetParent(__instance.HostInfoPanel?.transform);
+        }
     }
 
     [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.Update))]
@@ -75,6 +78,8 @@ internal static class LobbyPatch
     [HarmonyPostfix]
     private static void GameStartManager_Update_Postfix(GameStartManager __instance)
     {
+        if (BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_CancelStartingGame)) return;
+
         if (!GameState.IsHost)
         {
             __instance.StartButton.gameObject.SetActive(false);
@@ -97,6 +102,8 @@ internal static class LobbyPatch
     [HarmonyPrefix]
     private static bool GameStartManager_BeginGame_Prefix(GameStartManager __instance)
     {
+        if (BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_CancelStartingGame)) return true;
+
         if (__instance.startState == GameStartManager.StartingStates.Countdown)
         {
             SoundManager.instance.StopSound(__instance.gameStartSound);

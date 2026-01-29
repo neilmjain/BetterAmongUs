@@ -18,7 +18,7 @@ internal static class Translator
     /// <summary>
     /// Initializes the translator by loading all language files from embedded resources.
     /// </summary>
-    internal static void Init()
+    internal static void Initialize()
     {
         Logger_.Log("Loading language files...", "Translator");
         LoadLanguages();

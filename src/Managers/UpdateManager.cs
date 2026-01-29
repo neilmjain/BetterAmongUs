@@ -1,5 +1,6 @@
 ﻿using BepInEx.Unity.IL2CPP.Utils;
 using BetterAmongUs.Helpers;
+using BetterAmongUs.Modules;
 using BetterAmongUs.Network.Loaders;
 using Il2CppInterop.Runtime.Attributes;
 using System.Collections;
@@ -41,6 +42,8 @@ internal sealed class UpdateManager : MonoBehaviour
     /// </summary>
     internal void OnMainMenu()
     {
+        if (BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_ModUpdate)) return;
+
         var doNotPress = FindObjectOfType<DoNotPressButton>(true);
         if (doNotPress != null)
         {

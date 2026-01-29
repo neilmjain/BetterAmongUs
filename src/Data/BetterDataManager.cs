@@ -96,7 +96,7 @@ internal static class BetterDataManager
     /// <summary>
     /// Initializes the data manager, loading files and ensuring required directories exist.
     /// </summary>
-    internal static void Init()
+    internal static void Initialize()
     {
         BetterDataFile.Init();
         BetterGameSettingsFile.Init();

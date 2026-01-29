@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using BetterAmongUs.Modules;
+using HarmonyLib;
 using UnityEngine;
 
 namespace BetterAmongUs.Patches.Gameplay.UI.Chat;
@@ -10,6 +11,8 @@ internal static class ChatNotificationPatch
     [HarmonyPostfix]
     private static void ChatNotification_SetUp_Postfix(ChatNotification __instance)
     {
+        if (BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_BetterPingTracker)) return;
+
         __instance.GetComponent<AspectPosition>().DistanceFromEdge = new Vector3(-2.8f, 0.3f, -40f);
         __instance.transform.localScale = new Vector3(0.45f, 0.42f, 1f);
     }

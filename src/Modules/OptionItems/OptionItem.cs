@@ -30,7 +30,7 @@ internal abstract class OptionItem
     internal virtual bool Show => ShowCondition.Invoke();
     internal virtual bool ShowChildren => Show;
     internal Func<bool>? ShowCondition = () => { return true; };
-    internal bool Hide => !Show || GetParents().Any(opt => !opt.ShowChildren);
+    internal bool Hide => !Show || GetParents().Any(opt => !opt.ShowChildren) || BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_GameSetting + Translation);
     internal static OptionItem? GetOptionById(int id) => AllTBROptions.FirstOrDefault(opt => opt._id == id);
     internal virtual void UpdateVisuals(bool updateTabVisuals = true) { }
     internal abstract string ValueAsString();
@@ -430,7 +430,15 @@ internal abstract class OptionItem<T> : OptionItem
     private bool HasLoadValue { get; set; }
     protected T? Value { get; set; } = default;
     protected T? DefaultValue { get; set; } = default;
-    internal virtual T? GetValue() => Value;
+    internal virtual T? GetValue()
+    {
+        if (BAUModdedSupport.HasFlag(BAUModdedSupport.Disable_GameSetting + Translation))
+        {
+            return DefaultValue;
+        }
+
+        return Value;
+    }
     internal virtual T? GetDefaultValue() => DefaultValue;
     internal override string ValueAsString() => Value?.ToString() ?? string.Empty;
     internal override void SetToDefault()

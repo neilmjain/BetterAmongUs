@@ -126,29 +126,37 @@ internal class BAUPlugin : BasePlugin
 
             SetupConsole();
             RegisterAllMonoBehavioursInAssembly();
-
-            GithubAPI.Connect();
-            BetterDataManager.Init();
-            LoadOptions();
-            Translator.Init();
-            Harmony.PatchAll();
-            GameSettingsPatch.SetupSettings(true);
-            InstanceAttribute.RegisterAll();
-            OutfitData.Init();
-
-            if (File.Exists(Path.Combine(BetterDataManager.filePathFolder, "better-log.txt")))
-                File.WriteAllText(Path.Combine(BetterDataManager.filePathFolder, "better-previous-log.txt"), File.ReadAllText(Path.Combine(BetterDataManager.filePathFolder, "better-log.txt")));
-
-            File.WriteAllText(Path.Combine(BetterDataManager.filePathFolder, "better-log.txt"), "");
-            Logger_.Log("Better Among Us successfully loaded!");
-
-            string SupportedVersions = string.Join(" ", SupportedAmongUsVersions);
-            Logger_.Log($"BetterAmongUs {BetterAmongUsVersion}-{ModInfo.BuildDate} - [{AppVersion} --> {SupportedVersions}] {Utils.GetPlatformName(PlatformData.Platform)}");
+            IL2CPPChainloader.Instance.Finished += OnChainloaderFinished;
         }
         catch (Exception ex)
         {
             Logger_.Error(ex);
         }
+    }
+
+    /// <summary>
+    /// Runs when the BepInEx Chainloader has finished.
+    /// </summary>
+    private void OnChainloaderFinished()
+    {
+        BAUModdedSupport.Initialize();
+        GithubAPI.Connect();
+        BetterDataManager.Initialize();
+        LoadOptions();
+        Translator.Initialize();
+        Harmony.PatchAll();
+        GameSettingsPatch.SetupSettings(true);
+        InstanceAttribute.RegisterAll();
+        OutfitData.Initialize();
+
+        if (File.Exists(Path.Combine(BetterDataManager.filePathFolder, "better-log.txt")))
+            File.WriteAllText(Path.Combine(BetterDataManager.filePathFolder, "better-previous-log.txt"), File.ReadAllText(Path.Combine(BetterDataManager.filePathFolder, "better-log.txt")));
+
+        File.WriteAllText(Path.Combine(BetterDataManager.filePathFolder, "better-log.txt"), "");
+        Logger_.Log("Better Among Us successfully loaded!");
+
+        string SupportedVersions = string.Join(" ", SupportedAmongUsVersions);
+        Logger_.Log($"BetterAmongUs {BetterAmongUsVersion}-{ModInfo.BuildDate} - [{AppVersion} --> {SupportedVersions}] {Utils.GetPlatformName(PlatformData.Platform)}");
     }
 
     /// <summary>
