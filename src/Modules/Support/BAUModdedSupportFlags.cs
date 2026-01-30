@@ -44,7 +44,7 @@ public static class BAUModdedSupportFlags
     /// <summary>
     /// Flag to disable the anticheat system. When set by another mod, BetterAmongUs will disable its anticheat features.
     /// </summary>
-    public static string Disable_Anticheat = "anticheat.disable.anticheat";
+    public static string Disable_Anticheat = "anticheat.disable";
 
     /// <summary>
     /// Flag prefix to disable specific RPC handlers or their specific handler flags. 
