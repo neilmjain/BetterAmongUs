@@ -128,7 +128,7 @@ internal static class GameSettingsPatch
     [HarmonyPostfix]
     private static void GameSettingMenu_Start_Postfix(GameSettingMenu __instance)
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameSettings)) return;
+        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameOptions)) return;
 
         SetupSettings();
 
@@ -173,7 +173,7 @@ internal static class GameSettingsPatch
     [HarmonyPrefix]
     private static void GameSettingMenu_ChangeTab_Prefix(GameSettingMenu __instance, [HarmonyArgument(0)] int tabNum, [HarmonyArgument(1)] bool previewOnly)
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameSettings)) return;
+        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameOptions)) return;
 
         if (BetterSettingsTab == null) return;
 
@@ -197,7 +197,7 @@ internal static class GameSettingsPatch
     [HarmonyPrefix]
     private static bool GameOptionsMenu_CreateSettings_Prefix(GameOptionsMenu __instance)
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameSettings)) return true;
+        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameOptions)) return true;
 
         if (__instance == BetterSettingsTab.AUTab)
         {
@@ -211,7 +211,7 @@ internal static class GameSettingsPatch
     [HarmonyPrefix]
     private static void OptionsConsole_CanUse_Prefix(OptionsConsole __instance)
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameSettings)) return;
+        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameOptions)) return;
 
         __instance.HostOnly = false;
     }

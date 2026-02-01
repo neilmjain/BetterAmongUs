@@ -23,7 +23,7 @@ internal static class RoleHelper
     /// </summary>
     /// <param name="role">The role type to look up.</param>
     /// <returns>The RoleBehaviour if found, null otherwise.</returns>
-    internal static RoleBehaviour? GetBehaviour(this RoleTypes role)
+    internal static RoleBehaviour? GetBehaviourPrefab(this RoleTypes role)
     {
         var lookup = roleLookup.Value;
         return lookup.TryGetValue(role, out var behaviour) ? behaviour : null;
@@ -35,7 +35,7 @@ internal static class RoleHelper
     /// <param name="role">The role type to check.</param>
     /// <returns>True if the role is part of the impostor team, false otherwise.</returns>
     internal static bool IsImpostorRole(RoleTypes role) =>
-        role.GetBehaviour().TeamType is RoleTeamTypes.Impostor;
+        role.GetBehaviourPrefab().TeamType is RoleTeamTypes.Impostor;
 
     /// <summary>
     /// Gets the display name of a role type.
@@ -46,14 +46,14 @@ internal static class RoleHelper
     {
         if (role is RoleTypes.ImpostorGhost)
         {
-            return RoleTypes.Impostor.GetBehaviour()?.NiceName ?? "???";
+            return RoleTypes.Impostor.GetBehaviourPrefab()?.NiceName ?? "???";
         }
         else if (role is RoleTypes.CrewmateGhost)
         {
-            return RoleTypes.Crewmate.GetBehaviour()?.NiceName ?? "???";
+            return RoleTypes.Crewmate.GetBehaviourPrefab()?.NiceName ?? "???";
         }
 
-        return role.GetBehaviour()?.NiceName ?? "???";
+        return role.GetBehaviourPrefab()?.NiceName ?? "???";
     }
 
     /// <summary>

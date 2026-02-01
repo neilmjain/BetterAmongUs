@@ -14,104 +14,120 @@ namespace BetterAmongUs.Modules.Support;
 public static class BAUModdedSupportFlags
 {
     // ============================================
-    // Client Features - General
+    // Client Features
     // ============================================
 
     /// <summary>
-    /// Flag to disable the Better Ping Tracker feature. When set by another mod, BetterAmongUs will not patch out the normal ping tracker.
+    /// Disables the enhanced ping display
+    /// When enabled by another mod, BetterAmongUs will not replace the default ping tracker.
     /// </summary>
     public static string Disable_BetterPingTracker = "client.disable.betterpingtracker";
 
     /// <summary>
-    /// Flag to disable the Private Lobby feature. When set by another mod, BetterAmongUs will disable private only lobbies.
+    /// Disables private lobby functionality.
+    /// When enabled by another mod, BetterAmongUs will remove private only option when creating a lobby.
     /// </summary>
     public static string Disable_PrivateLobby = "client.disable.privatelobby";
 
     /// <summary>
-    /// Flag to disable theme. When set by another mod, BetterAmongUs will disable its theming features.
+    /// Disables all theming and customization features.
+    /// When enabled by another mod, BetterAmongUs will use the default game appearance.
     /// </summary>
     public static string Disable_Theme = "client.disable.theme";
 
     /// <summary>
-    /// Flag to disable custom mod stamp sprite. When set by another mod, BetterAmongUs will disable its custom mod stamp sprite.
+    /// Disables the custom mod badge/stamp.
+    /// When enabled by another mod, BetterAmongUs will use the default mod indicator.
     /// </summary>
     public static string Disable_CustomModStamp = "client.disable.custommodstamp";
 
     /// <summary>
-    /// Flag to disable custom ServerDropDown. When set by another mod, BetterAmongUs will disable its custom ServerDropDown.
+    /// Disables the custom server region dropdown menu.
+    /// When enabled by another mod, BetterAmongUs will use the default server selection interface.
     /// </summary>
     public static string Disable_ServerDropDown = "client.disable.serverdropdown";
 
     /// <summary>
-    /// Flag to disable custom DiscordRP. When set by another mod, BetterAmongUs will disable its custom DiscordRP for BAU.
+    /// Disables Discord Rich Presence integration.
+    /// When enabled by another mod, BetterAmongUs will not update Discord status.
     /// </summary>
     public static string Disable_DiscordRP = "client.disable.discordrp";
 
     /// <summary>
-    /// Flag to disable custom BAU Http Header. When set by another mod, BetterAmongUs will disable its custom http header it sends when looking for games.
+    /// Disables the custom HTTP header that identifies BetterAmongUs clients to matchmaking servers.
+    /// When enabled by another mod, BetterAmongUs will use standard HTTP headers.
     /// </summary>
     public static string Disable_BAUHttpHeader = "client.disable.bauhttpheader";
 
     // ============================================
-    // Anti-Cheat Features
+    // Anti-Cheat System
     // ============================================
 
     /// <summary>
-    /// Flag to disable the anticheat system. When set by another mod, BetterAmongUs will disable its anticheat features.
+    /// Completely disables the anti-cheat system.
+    /// When enabled by another mod, all anti-cheat features will be inactive.
     /// </summary>
     public static string Disable_Anticheat = "anticheat.disable";
 
     /// <summary>
-    /// Flag prefix to disable specific RPC handlers or their specific handler flags. 
-    /// The full flag should be "anticheat.disable.rpchandler=HandlerClassName" to disable the entire handler,
-    /// or "anticheat.disable.rpchandler=HandlerClassName:HandlerFlagName" to disable specific handling types.
-    /// When set by another mod, BetterAmongUs will disable the specified RPC handler or handler flag.
-    /// <seealso cref="AntiCheat.RPCHandler"/> for the base handler class that can be disabled.
-    /// <seealso cref="Enums.HandlerFlag"/> for the enum of handler flags that can be selectively disabled.
+    /// Prefix for disabling specific RPC handlers or handler flags.
+    /// Format: "anticheat.disable.rpchandler=HandlerClassName" to disable entire handler,
+    /// or "anticheat.disable.rpchandler=HandlerClassName:HandlerFlagName" for specific flags.
+    /// When enabled by another mod, BetterAmongUs will skip the specified RPC validations.
+    /// <seealso cref="AntiCheat.RPCHandler"/> for base handler class.
+    /// <seealso cref="Enums.HandlerFlag"/> for available handler flags.
     /// </summary>
     public static string Disable_RPCHandler = "anticheat.disable.rpchandler=";
 
     // ============================================
-    // Client Features - Command System
+    // Command System
     // ============================================
 
     /// <summary>
-    /// Flag to disable command system. When set by another mod, BetterAmongUs will disable its command features.
+    /// Disables the entire command system.
+    /// When enabled by another mod, no BetterAmongUs commands will be available.
     /// </summary>
     public static string Disable_AllCommands = "command.disable.allcommands";
 
     /// <summary>
-    /// Flag prefix to disable specific commands. The full flag should be "client.disable=COMMAND_NAME".
-    /// When set by another mod, BetterAmongUs will disable the specified command.
+    /// Prefix for disabling specific commands.
+    /// Format: "command.disable=COMMAND_NAME"
+    /// When enabled by another mod, the specified command will be unavailable.
+    /// <seealso cref="Commands.BaseCommand"/> for base command class.
     /// </summary>
     public static string Disable_Command = "command.disable=";
 
     /// <summary>
-    /// Flag prefix for forcing the command prefix for BAU to be "bau:"
+    /// Forces all BetterAmongUs commands to use the "bau:" prefix.
+    /// When enabled by another mod, commands must be prefixed with "bau:" to work.
     /// </summary>
     public static string Force_BAU_Command_Prefix = "command.force.bau.prefix";
 
     // ============================================
-    // Client Features - Game Settings
+    // Game Options & Settings
     // ============================================
 
     /// <summary>
-    /// Flag to disable game settings modifications. When set by another mod, BetterAmongUs will not modify game settings.
+    /// Disables all custom game option modifications.
+    /// When enabled by another mod, BetterAmongUs will use default game options.
     /// </summary>
-    public static string Disable_AllGameSettings = "gamesetting.disable.allgamesettings";
+    public static string Disable_AllGameOptions = "gameoption.disable.allgameoptions";
 
     /// <summary>
-    /// Flag prefix to disable specific game setting. The full flag should be "client.disable=TRANSLATION_NAME".
-    /// When set by another mod, BetterAmongUs will disable the specified game setting and uses default value.
+    /// Prefix for disabling specific game options.
+    /// Format: "gameoption.disable=TRANSLATION_NAME"
+    /// When enabled by another mod, the specified option will be hidden and use default values.
+    /// <seealso cref="OptionItems.OptionItem"/> for base option class.
     /// </summary>
-    public static string Disable_GameSetting = "gamesetting.disable=";
+    public static string Disable_GameOption = "gameoption.disable=";
 
     // ============================================
     // Lobby Features
     // ============================================
 
     /// <summary>
-    /// Flag to disable cancel starting game. When set by another mod, BetterAmongUs will not patch start game button.
+    /// Disables the ability to cancel game start countdown.
+    /// When enabled by another mod, the start game button cannot be interrupted once clicked.
     /// </summary>
     public static string Disable_CancelStartingGame = "lobby.disable.cancelstartinggame";
 
@@ -120,14 +136,32 @@ public static class BAUModdedSupportFlags
     // ============================================
 
     /// <summary>
-    /// Flag to disable mod update button. When set by another mod, BetterAmongUs will not show update button in the main menu.
+    /// Disables the mod update notification button.
+    /// When enabled by another mod, update checks and prompts will not appear in the main menu.
     /// </summary>
     public static string Disable_ModUpdate = "mainmenu.disable.modupdate";
 
     /// <summary>
-    /// Flag to disable the BetterAmongUs logo in the main menu. When set by another mod, BetterAmongUs will hide its logo.
+    /// Disables the BetterAmongUs logo/branding in the main menu.
+    /// When enabled by another mod, the BAU logo will be hidden.
     /// </summary>
     public static string Disable_BAULogo = "mainmenu.disable.baulogo";
+
+    // ============================================
+    // Gameplay Features
+    // ============================================
+
+    /// <summary>
+    /// Disables the enhanced role assignment algorithm.
+    /// When enabled by another mod, BetterAmongUs will use the default role distribution system.
+    /// </summary>
+    public static string Disable_BetterRoleAlgorithm = "gameplay.disable.betterrolealgorithm";
+
+    /// <summary>
+    /// Disables the detailed end-game summary screen.
+    /// When enabled by another mod, only the default end-game screen will be shown.
+    /// </summary>
+    public static string Disable_EndGameSummary = "gameplay.disable.endgamesummary";
 
     private static readonly HashSet<string> _flags = [];
     private static bool _initialized = false;

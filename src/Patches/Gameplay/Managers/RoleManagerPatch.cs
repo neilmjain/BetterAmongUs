@@ -1,6 +1,7 @@
 ﻿using AmongUs.GameOptions;
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
+using BetterAmongUs.Modules.Support;
 using BetterAmongUs.Mono;
 using BetterAmongUs.Patches.Gameplay.UI.Settings;
 using HarmonyLib;
@@ -37,6 +38,11 @@ internal static class RoleManagerPatch
     [HarmonyPrefix]
     private static bool RoleManager_SelectRoles_Prefix()
     {
+        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_BetterRoleAlgorithm))
+        {
+            return true;
+        }
+
         if (!GameState.IsHideNSeek)
         {
             RegularBetterRoleAssignment();
@@ -100,7 +106,7 @@ internal static class RoleManagerPatch
 
         foreach (RoleTypes role in Roles)
         {
-            if (IsImpostorRole(role))
+            if (role.GetBehaviourPrefab().IsImpostor)
                 ImpostorRoles[role] = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(role);
             else
                 CrewmateRoles[role] = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(role);
@@ -343,8 +349,6 @@ internal static class RoleManagerPatch
 
         return false;
     }
-
-    private static bool IsImpostorRole(RoleTypes role) => role.GetBehaviour().IsImpostor;
 
     internal static int RNG()
     {

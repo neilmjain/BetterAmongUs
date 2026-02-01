@@ -11,7 +11,7 @@ internal static class NumberOptionPatch
     [HarmonyPrefix]
     private static bool NumberOption_Increase_Prefix(NumberOption __instance)
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameSettings)) return true;
+        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameOptions)) return true;
 
         int times = 1;
         if (Input.GetKey(KeyCode.LeftShift))
@@ -37,7 +37,7 @@ internal static class NumberOptionPatch
     [HarmonyPrefix]
     private static bool NumberOption_Decrease_Prefix(NumberOption __instance)
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameSettings)) return true;
+        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_AllGameOptions)) return true;
 
         int times = 1;
         if (Input.GetKey(KeyCode.LeftShift))
