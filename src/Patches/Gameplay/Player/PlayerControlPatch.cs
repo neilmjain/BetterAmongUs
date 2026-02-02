@@ -14,18 +14,24 @@ internal static class PlayerControlPatch
     [HarmonyPostfix]
     private static void PlayerControl_Start_Postfix(PlayerControl __instance, ref Il2CppSystem.Collections.IEnumerator __result)
     {
+        // Add player to global player list
         BAUPlugin.AllPlayerControls.Add(__instance);
+
+        // Update option UI values for all players
         OptionPlayerItem.UpdateAllValues();
 
+        // Append favorite color setting to player initialization coroutine
         __result = Effects.Sequence(__result, CoSetFavoriteColor(__instance).WrapToIl2Cpp());
     }
 
     private static IEnumerator CoSetFavoriteColor(PlayerControl player)
     {
+        // Apply player's favorite color setting if they own this character
         if (player.AmOwner)
         {
             if (BAUPlugin.FavoriteColor.Value >= 0 && player.cosmetics.ColorId != (byte)BAUPlugin.FavoriteColor.Value)
             {
+                // Send command to server to change color
                 player.CmdCheckColor((byte)BAUPlugin.FavoriteColor.Value);
             }
         }
@@ -37,7 +43,10 @@ internal static class PlayerControlPatch
     [HarmonyPostfix]
     private static void PlayerControl_OnDestroy_Postfix(PlayerControl __instance)
     {
+        // Remove player from global list when destroyed
         BAUPlugin.AllPlayerControls.Remove(__instance);
+
+        // Update option UI values
         OptionPlayerItem.UpdateAllValues();
     }
 
@@ -47,8 +56,10 @@ internal static class PlayerControlPatch
     {
         if (target == null) return;
 
+        // Log kill event with player names and roles
         Logger_.LogPrivate($"{__instance.Data.PlayerName} Has killed {target.Data.PlayerName} as {__instance.Data.RoleType.GetRoleName()}", "EventLog");
 
+        // Track kill count in player's BetterData
         __instance.BetterData().RoleInfo.Kills += 1;
     }
 
@@ -58,6 +69,7 @@ internal static class PlayerControlPatch
     {
         if (targetPlayer == null) return;
 
+        // Log shapeshift events (both shifting and unshifting)
         if (__instance != targetPlayer)
             Logger_.LogPrivate($"{__instance.Data.PlayerName} Has Shapeshifted into {targetPlayer.Data.PlayerName}, did animate: {animate}", "EventLog");
         else
@@ -68,7 +80,7 @@ internal static class PlayerControlPatch
     [HarmonyPostfix]
     private static void PlayerControl_SetRoleInvisibility_Postfix(PlayerControl __instance, bool isActive, bool shouldAnimate)
     {
-
+        // Log Phantom role visibility changes
         if (isActive)
             Logger_.LogPrivate($"{__instance.Data.PlayerName} Has Vanished as Phantom, did animate: {shouldAnimate}", "EventLog");
         else
@@ -79,6 +91,7 @@ internal static class PlayerControlPatch
     [HarmonyPostfix]
     private static void PlayerControl_SetName_Postfix(PlayerControl __instance, string playerName)
     {
+        // Store the last set name in player's BetterData
         __instance.BetterDataWait(data =>
         {
             data.NameSetAsLast = playerName;
@@ -89,6 +102,7 @@ internal static class PlayerControlPatch
     [HarmonyPostfix]
     private static void PlayerPhysics_BootFromVent_Postfix(PlayerPhysics __instance, int ventId)
     {
+        // Log vent boot events (when engineer boots someone)
         Logger_.LogPrivate($"{__instance.myPlayer.Data.PlayerName} Has been booted from vent: {ventId}, as {__instance.myPlayer.Data.RoleType.GetRoleName()}", "EventLog");
     }
 
@@ -96,6 +110,7 @@ internal static class PlayerControlPatch
     [HarmonyPostfix]
     private static void PlayerPhysics_CoEnterVent_Postfix(PlayerPhysics __instance, int id)
     {
+        // Log vent entry events
         Logger_.LogPrivate($"{__instance.myPlayer.Data.PlayerName} Has entered vent: {id}, as {__instance.myPlayer.Data.RoleType.GetRoleName()}", "EventLog");
     }
 
@@ -103,6 +118,7 @@ internal static class PlayerControlPatch
     [HarmonyPostfix]
     private static void PlayerPhysics_CoExitVent_Postfix(PlayerPhysics __instance, int id)
     {
+        // Log vent exit events
         Logger_.LogPrivate($"{__instance.myPlayer.Data.PlayerName} Has exit vent: {id}, as {__instance.myPlayer.Data.RoleType.GetRoleName()}", "EventLog");
     }
 }

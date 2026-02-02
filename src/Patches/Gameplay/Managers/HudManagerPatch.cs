@@ -5,7 +5,6 @@ using HarmonyLib;
 using TMPro;
 using UnityEngine;
 
-
 namespace BetterAmongUs.Patches.Gameplay.Managers;
 
 [HarmonyPatch]
@@ -21,6 +20,7 @@ internal static class HudManagerPatch
     [HarmonyPostfix]
     private static void HudManager_Start_Postfix(HudManager __instance)
     {
+        // Create custom BAU notification system if it doesn't exist
         if (BetterNotificationManager.BAUNotificationManagerObj == null)
         {
             var ChatNotifications = __instance.Chat.chatNotification;
@@ -28,31 +28,46 @@ internal static class HudManagerPatch
             {
                 ChatNotifications.timeOnScreen = 1f;
                 ChatNotifications.gameObject.SetActive(true);
+
+                // Clone chat notification system for BAU notifications
                 GameObject BAUNotification = UnityEngine.Object.Instantiate(ChatNotifications.gameObject);
                 BAUNotification.name = "BAUNotification";
                 BAUNotification.GetComponent<ChatNotification>().DestroyMono();
+
+                // Remove unnecessary elements from the clone
                 GameObject.Find($"{BAUNotification.name}/Sizer/PoolablePlayer").DestroyObj();
                 GameObject.Find($"{BAUNotification.name}/Sizer/ColorText").DestroyObj();
+
+                // Position notification at bottom-left corner
                 BAUNotification.GetComponent<AspectPosition>().DistanceFromEdge = new Vector3(-1.57f, 5.3f, -15f);
                 GameObject.Find($"{BAUNotification.name}/Sizer/NameText").transform.localPosition = new Vector3(-3.3192f, -0.0105f);
+
+                // Cache TextMeshPro component for text updates
                 BetterNotificationManager.NameText = GameObject.Find($"{BAUNotification.name}/Sizer/NameText").GetComponent<TextMeshPro>();
                 UnityEngine.Object.DontDestroyOnLoad(BAUNotification);
                 BetterNotificationManager.BAUNotificationManagerObj = BAUNotification;
                 BAUNotification.SetActive(false);
+
+                // Reset original chat notification settings
                 ChatNotifications.timeOnScreen = 0f;
                 ChatNotifications.gameObject.SetActive(false);
+
+                // Configure text wrapping for multi-line notifications
                 BetterNotificationManager.TextArea.enableWordWrapping = true;
                 BetterNotificationManager.TextArea.m_firstOverflowCharacterIndex = 0;
                 BetterNotificationManager.TextArea.overflowMode = TextOverflowModes.Overflow;
             }
         }
 
+        // Show welcome message after 1 second delay (only once per session)
         LateTask.Schedule(() =>
         {
             if (!HasBeenWelcomed && GameState.IsInGame && GameState.IsLobby && !GameState.IsFreePlay)
             {
+                // Show notification with welcome text
                 BetterNotificationManager.Notify($"<b><color=#00751f>{string.Format(Translator.GetString("WelcomeMsg.WelcomeToBAU"), Translator.GetString("BetterAmongUs"))}!</color></b>", 8f);
 
+                // Send detailed welcome message to private chat
                 Utils.AddChatPrivate(WelcomeMessage, overrideName: " ");
                 HasBeenWelcomed = true;
             }
@@ -65,16 +80,17 @@ internal static class HudManagerPatch
     {
         try
         {
+            // Adjust GameStartManager position for better UI layout
             GameObject gameStart = GameObject.Find("GameStartManager");
             if (gameStart != null)
                 gameStart.transform.SetLocalY(-2.8f);
 
-
-            // Set chat
+            // Manage in-game chat visibility based on settings and game state
             if (GameState.InGame)
             {
                 if (!BAUPlugin.ChatInGameplay.Value)
                 {
+                    // Vanilla chat behavior: only show chat when dead or during meetings
                     if (!PlayerControl.LocalPlayer.IsAlive())
                     {
                         __instance.Chat.gameObject.SetActive(true);
@@ -86,6 +102,7 @@ internal static class HudManagerPatch
                 }
                 else
                 {
+                    // BAU chat behavior: always show chat when enabled
                     if (__instance?.Chat?.gameObject.active == false)
                     {
                         __instance.Chat.gameObject.SetActive(true);
@@ -93,6 +110,8 @@ internal static class HudManagerPatch
                 }
             }
         }
-        catch { }
+        catch
+        {
+        }
     }
 }

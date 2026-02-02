@@ -11,31 +11,38 @@ namespace BetterAmongUs.Patches.Client;
 internal static class PrivateLobbyPatch
 {
     private static GameObject? toggle;
-    private static List<PassiveButton>? buttons = [];
+    private static readonly List<PassiveButton>? buttons = [];
     private static TextMeshPro? toggleText;
 
     [HarmonyPatch(typeof(CreateGameOptions), nameof(CreateGameOptions.Show))]
     [HarmonyPostfix]
     private static void CreateGameOptions_Show_Postfix(CreateGameOptions __instance)
     {
+        // Check if other mods have disabled private lobby feature
         if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_PrivateLobby))
         {
             BAUPlugin.PrivateOnlyLobby.Value = false;
             return;
         }
 
+        // Only create toggle UI once
         if (toggle != null) return;
         buttons.Clear();
 
+        // Clone April Fools toggle as template for private lobby toggle
         toggle = UnityEngine.Object.Instantiate(__instance.AprilFoolsToggle, __instance.contentObjects.First().transform.parent);
         if (toggle != null)
         {
             toggle.name = "PrivateOnlyLobby";
+
+            // Get the ON and OFF buttons from the toggle
             buttons.Add(toggle.transform.Find("AprilOn").GetComponent<PassiveButton>());
             buttons.Add(toggle.transform.Find("AprilOff").GetComponent<PassiveButton>());
             if (buttons.Count < 2) return;
 
             toggle.gameObject.SetActive(true);
+
+            // Set up ON button click handler
             var onButton = buttons[0];
             if (onButton != null)
             {
@@ -43,6 +50,8 @@ internal static class PrivateLobbyPatch
                 onButton.OnClick = new();
                 onButton.OnClick.AddListener((Action)(() => TogglePrivateOnlyLobby(true)));
             }
+
+            // Set up OFF button click handler
             var offButton = buttons[1];
             if (offButton != null)
             {
@@ -50,11 +59,14 @@ internal static class PrivateLobbyPatch
                 offButton.OnClick = new();
                 offButton.OnClick.AddListener((Action)(() => TogglePrivateOnlyLobby(false)));
             }
+
+            // Position toggle at top-right of create game screen
             var aspect = toggle.gameObject.AddComponent<AspectPosition>();
             aspect.Alignment = AspectPosition.EdgeAlignments.Top;
             aspect.DistanceFromEdge = new Vector3(0.4f, 1.62f, 0);
             aspect.AdjustPosition();
 
+            // Update toggle text label
             var text = toggle.transform.Find("BlackSquare/ModeText")?.GetComponent<TextMeshPro>();
             if (text != null)
             {
@@ -64,6 +76,7 @@ internal static class PrivateLobbyPatch
             }
         }
 
+        // Initialize toggle state from saved configuration
         TogglePrivateOnlyLobby(BAUPlugin.PrivateOnlyLobby.Value);
     }
 
@@ -71,11 +84,15 @@ internal static class PrivateLobbyPatch
     {
         if (buttons.Count < 2) return;
 
+        // Show both buttons first
         buttons[0].gameObject.SetActive(true);
         buttons[1].gameObject.SetActive(true);
+
+        // Deselect both buttons
         buttons[0].SelectButton(false);
         buttons[1].SelectButton(false);
 
+        // Select appropriate button based on mode
         if (modeOn)
         {
             buttons[0].SelectButton(true);
@@ -84,6 +101,8 @@ internal static class PrivateLobbyPatch
         {
             buttons[1].SelectButton(true);
         }
+
+        // Save setting to configuration
         BAUPlugin.PrivateOnlyLobby.Value = modeOn;
     }
 
@@ -91,23 +110,24 @@ internal static class PrivateLobbyPatch
     [HarmonyPostfix]
     private static void LobbyInfoPane_Update_Postfix(LobbyInfoPane __instance)
     {
+        // Enforce private lobby setting if enabled by host
         if (BAUPlugin.PrivateOnlyLobby.Value && !GameState.IsLocalGame && GameState.IsHost)
         {
+            // Ensure game stays private
             if (AmongUsClient.Instance.IsGamePublic)
             {
                 AmongUsClient.Instance.ChangeGamePublic(false);
             }
 
+            // Disable and visually indicate that public lobby button is locked
             var button = __instance.HostPrivateButton.GetComponent<PassiveButton>();
             if (button != null)
             {
                 button.enabled = false;
 
+                // Change inactive sprite to cyan color to indicate locked state
                 var sprite = __instance.HostPrivateButton.transform.Find("Inactive").GetComponent<SpriteRenderer>();
-                if (sprite != null)
-                {
-                    sprite.color = new(0.35f, 1, 1, 1);
-                }
+                sprite?.color = new(0.35f, 1, 1, 1);
             }
         }
     }

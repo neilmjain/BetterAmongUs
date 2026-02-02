@@ -16,7 +16,7 @@ internal static class PlayerJoinAndLeftPatch
     [HarmonyPostfix]
     private static void AmongUsClient_OnGameJoined_Postfix()
     {
-        // Fix host icon in lobby on modded servers
+        // Fix host icon color display on modded servers
         if (!GameState.IsVanillaServer)
         {
             var host = AmongUsClient.Instance.GetHost().Character;
@@ -31,6 +31,7 @@ internal static class PlayerJoinAndLeftPatch
     [HarmonyPostfix]
     private static void AmongUsClient_OnPlayerJoined_Postfix(ClientData data)
     {
+        // Schedule ban list checks 2.5 seconds after player joins
         LateTask.Schedule(() =>
         {
             if (GameState.IsHost)
@@ -39,7 +40,7 @@ internal static class PlayerJoinAndLeftPatch
                 {
                     var player = Utils.PlayerFromClientId(data.Id);
 
-                    // Auto ban player on ban list
+                    // Check if player is in ban list by friend code or PUID
                     if (BetterGameSettings.UseBanPlayerList.GetBool())
                     {
                         if (player != null)
@@ -52,6 +53,8 @@ internal static class PlayerJoinAndLeftPatch
                             }
                         }
                     }
+
+                    // Check if player name matches banned name patterns
                     if (BetterGameSettings.UseBanNameList.GetBool())
                     {
                         if (player != null)
@@ -71,6 +74,7 @@ internal static class PlayerJoinAndLeftPatch
     [HarmonyPostfix]
     private static void AmongUsClient_OnPlayerLeft_Postfix(ClientData data, DisconnectReasons reason)
     {
+        // Reclaim favorite color when player leaves in lobby
         if (GameState.IsLobby)
         {
             var favColorId = (byte)BAUPlugin.FavoriteColor.Value;
@@ -83,6 +87,7 @@ internal static class PlayerJoinAndLeftPatch
             }
         }
 
+        // Update host icon in meeting
         MeetingHudPatch.UpdateHostIcon();
     }
 
@@ -93,11 +98,13 @@ internal static class PlayerJoinAndLeftPatch
     [HarmonyPrefix]
     private static void GameData_HandleDisconnect_Prefix(PlayerControl player, DisconnectReasons reason)
     {
+        // Store disconnect reason in player's BetterData
         if (player.BetterData() != null)
         {
             player.BetterData().DisconnectReason = reason;
         }
 
+        // Show custom disconnect notification
         BetterShowNotification(player.Data, reason);
     }
 
@@ -105,16 +112,19 @@ internal static class PlayerJoinAndLeftPatch
     [HarmonyPrefix]
     internal static bool GameData_ShowNotification_Prefix()
     {
+        // Disable vanilla disconnect notifications (use BAU's instead)
         return false;
     }
 
     internal static void BetterShowNotification(NetworkedPlayerInfo playerData, DisconnectReasons reason = DisconnectReasons.Unknown, string forceReasonText = "")
     {
+        // Prevent showing duplicate notifications
         if (playerData.BetterData().AntiCheatInfo.BannedByAntiCheat || playerData.BetterData().HasShowDcMsg) return;
         playerData.BetterData().HasShowDcMsg = true;
 
         string? playerName = playerData.BetterData().RealName;
 
+        // Use custom reason text if provided
         if (forceReasonText != "")
         {
             var ReasonText = $"<color=#ff0>{playerData.BetterData().RealName}</color> {forceReasonText}";
@@ -127,6 +137,7 @@ internal static class PlayerJoinAndLeftPatch
         {
             string ReasonText;
 
+            // Format disconnect message based on reason type
             switch (reason)
             {
                 case DisconnectReasons.ExitGame:
@@ -157,6 +168,7 @@ internal static class PlayerJoinAndLeftPatch
 
             Logger_.Log(ReasonText);
 
+            // Add formatted disconnect message to game UI
             HudManager.Instance.Notifier.AddDisconnectMessage(ReasonText);
         }
     }

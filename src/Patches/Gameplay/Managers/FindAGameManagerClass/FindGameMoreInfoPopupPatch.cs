@@ -20,6 +20,7 @@ internal static class FindGameMoreInfoPopupPatch
     {
         _findGameMoreInfoPopup = __instance;
 
+        // Create custom settings info text box if it doesn't exist
         if (_textBox == null)
         {
             _textBox = UnityEngine.Object.Instantiate(AccountManager.Instance.genericInfoDisplayBox, __instance.transform);
@@ -41,6 +42,7 @@ internal static class FindGameMoreInfoPopupPatch
             pos.AdjustPosition();
         }
 
+        // Display all game settings when popup opens
         ShowAll();
     }
 
@@ -51,8 +53,10 @@ internal static class FindGameMoreInfoPopupPatch
         _sb.Clear();
         var options = _findGameMoreInfoPopup.gameListing.Options;
 
+        // Display settings based on game mode
         if (options.GameMode is GameModes.Normal or GameModes.NormalFools)
         {
+            // Impostor settings
             FormatOption(StringNames.GameNumImpostors, $"{options.NumImpostors}");
             if (options.TryGetFloat(FloatOptionNames.KillCooldown, out var value1))
             {
@@ -69,6 +73,7 @@ internal static class FindGameMoreInfoPopupPatch
 
             AddBreak();
 
+            // General gameplay settings
             if (options.TryGetFloat(FloatOptionNames.PlayerSpeedMod, out var value4))
             {
                 FormatOption(StringNames.GamePlayerSpeed, $"{value4}x");
@@ -80,6 +85,7 @@ internal static class FindGameMoreInfoPopupPatch
 
             AddBreak();
 
+            // Meeting settings
             if (options.TryGetInt(Int32OptionNames.NumEmergencyMeetings, out var value6))
             {
                 FormatOption(StringNames.GameNumMeetings, $"{value6}");
@@ -107,6 +113,7 @@ internal static class FindGameMoreInfoPopupPatch
 
             AddBreak();
 
+            // Task settings
             if (options.TryGetInt(Int32OptionNames.TaskBarMode, out var value12))
             {
                 FormatOption(StringNames.GameTaskBarMode, GetTaskBarMode(value12));
@@ -130,6 +137,7 @@ internal static class FindGameMoreInfoPopupPatch
         }
         else if (options.GameMode is GameModes.HideNSeek or GameModes.SeekFools)
         {
+            // Hide & Seek specific settings (Hider/Crewmate)
             if (options.TryGetFloat(FloatOptionNames.PlayerSpeedMod, out var value1))
             {
                 FormatOption(StringNames.GamePlayerSpeed, $"{value1}x");
@@ -165,6 +173,7 @@ internal static class FindGameMoreInfoPopupPatch
 
             AddBreak();
 
+            // Hide & Seek Seeker (Impostor) settings
             if (options.TryGetFloat(FloatOptionNames.ImpostorFlashlightSize, out var value9))
             {
                 FormatOption(StringNames.ImpostorFlashlightSize, $"{value9}x");
@@ -176,6 +185,7 @@ internal static class FindGameMoreInfoPopupPatch
 
             AddBreak();
 
+            // Hide & Seek final phase settings
             if (options.TryGetFloat(FloatOptionNames.FinalEscapeTime, out var value11))
             {
                 FormatOption(StringNames.FinalEscapeTime, $"{value11}s");
@@ -199,6 +209,7 @@ internal static class FindGameMoreInfoPopupPatch
 
             AddBreak();
 
+            // Hide & Seek task settings
             if (options.TryGetInt(Int32OptionNames.NumCommonTasks, out var value16))
             {
                 FormatOption(StringNames.GameCommonTasks, $"{value16}");
@@ -213,6 +224,7 @@ internal static class FindGameMoreInfoPopupPatch
             }
         }
 
+        // Update text box with formatted settings
         if (_textBox != null)
         {
             _textBox.SetText(_sb.ToString());
@@ -221,11 +233,13 @@ internal static class FindGameMoreInfoPopupPatch
 
     private static void FormatOption(StringNames optName, string value)
     {
+        // Format each setting line with gray label and yellow value
         _sb.AppendLine($"{Translator.GetString(optName)}<#989898>:</color> <#CFCF00>{value}</color>");
     }
 
     private static void AddBreak()
     {
+        // Add separator line between settings groups
         _sb.AppendLine("<#999999>----------------------</color>");
     }
 
@@ -233,6 +247,7 @@ internal static class FindGameMoreInfoPopupPatch
 
     private static string GetKillDistance(int value)
     {
+        // Convert kill distance integer to readable string
         switch (value)
         {
             case 0:
@@ -250,6 +265,7 @@ internal static class FindGameMoreInfoPopupPatch
 
     private static string GetTaskBarMode(int value)
     {
+        // Convert task bar mode integer to readable string
         switch (value)
         {
             case 0:

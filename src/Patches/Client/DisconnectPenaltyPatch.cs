@@ -10,8 +10,11 @@ internal static class DisconnectPenaltyPatch
     [HarmonyPrefix]
     private static bool PlayerBanData_IsBanned_Prefix(PlayerBanData __instance, ref bool __result)
     {
+        // Reset ban points to zero to prevent disconnect penalties
         __instance.BanPoints = 0f;
         __instance.banPoints = 0f;
+
+        // Always return false (not banned) regardless of actual ban status
         __result = false;
         return false;
     }

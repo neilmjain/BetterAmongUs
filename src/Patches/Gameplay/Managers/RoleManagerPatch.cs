@@ -15,6 +15,7 @@ internal static class RoleManagerPatch
     internal static Dictionary<string, int> ImpostorMultiplier = []; // HashPuid, Multiplier
     private static readonly Random random = new();
 
+    // Check if client is not verified Better Among Us user
     static readonly Func<InnerNet.ClientData, bool> clientCheck = (clientData) =>
     {
         return clientData?.BetterData()?.IsVerifiedBetterUser != true;
@@ -24,6 +25,7 @@ internal static class RoleManagerPatch
     [HarmonyPrefix]
     private static void RoleManager_SetRole_Prefix(RoleManager __instance, PlayerControl targetPlayer, RoleTypes roleType)
     {
+        // Store the original role when player dies (for ghost role purposes)
         if (RoleManager.IsGhostRole(roleType))
         {
             if (!RoleManager.IsGhostRole(targetPlayer.Data.RoleType))
@@ -33,16 +35,18 @@ internal static class RoleManagerPatch
         }
     }
 
-    // Better role algorithm
+    // Better role assignment algorithm (replaces vanilla role assignment)
     [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
     [HarmonyPrefix]
     private static bool RoleManager_SelectRoles_Prefix()
     {
+        // Skip BAU role assignment if other mods disabled it
         if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_BetterRoleAlgorithm))
         {
             return true;
         }
 
+        // Use different algorithms for different game modes
         if (!GameState.IsHideNSeek)
         {
             RegularBetterRoleAssignment();
@@ -52,6 +56,7 @@ internal static class RoleManagerPatch
             HideAndSeekBetterRoleAssignment();
         }
 
+        // Return false to prevent vanilla role assignment from running
         return false;
     }
 
@@ -59,14 +64,14 @@ internal static class RoleManagerPatch
     {
         Logger_.LogHeader($"Better Role Assignment Has Started", "RoleManager");
 
-        // Set roles up
+        // Initialize impostor multiplier tracking for all players
         foreach (var addplayer in BAUPlugin.AllPlayerControls.Where(pc => !ImpostorMultiplier.ContainsKey(Utils.GetHashPuid(pc))))
             ImpostorMultiplier[Utils.GetHashPuid(addplayer)] = 0;
 
         int NumImpostors = GameOptionsManager.Instance.CurrentGameOptions.NumImpostors;
-
         int NumPlayers = BAUPlugin.AllPlayerControls.Count;
 
+        // Apply player count limits to impostor numbers
         var impostorLimits = new Dictionary<int, int>
         {
             { 3, 1 },
@@ -86,6 +91,7 @@ internal static class RoleManagerPatch
         List<PlayerControl> Impostors = [];
         List<PlayerControl> Crewmates = [];
 
+        // Track available roles and their counts
         Dictionary<RoleTypes, int> ImpostorRoles = new() // Role, Amount
         {
             { RoleTypes.Shapeshifter, 0 },
@@ -104,6 +110,7 @@ internal static class RoleManagerPatch
 
         List<RoleTypes> Roles = [.. ImpostorRoles.Keys, .. CrewmateRoles.Keys];
 
+        // Get role counts from game options
         foreach (RoleTypes role in Roles)
         {
             if (role.GetBehaviourPrefab().IsImpostor)
@@ -112,7 +119,7 @@ internal static class RoleManagerPatch
                 CrewmateRoles[role] = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(role);
         }
 
-        // Get players in random order
+        // Shuffle players for random role assignment
         List<PlayerControl> players = [.. BAUPlugin.AllPlayerControls.Where(player => !Impostors.Contains(player) && !Crewmates.Contains(player) && player.roleAssigned == false)];
 
         int n = players.Count;
@@ -125,24 +132,26 @@ internal static class RoleManagerPatch
             players[n] = value;
         }
 
-        // Assign roles
+        // Assign roles to each player
         foreach (PlayerControl pc in players)
         {
             if (pc == null || pc.roleAssigned == true) continue;
 
+            // Check if player should be impostor based on multiplier and available slots
             if (Impostors.Count < NumImpostors && RNG() > ImpostorMultiplier[Utils.GetHashPuid(pc)])
             {
                 var impRoles = ImpostorRoles.Shuffle();
                 foreach (var kvp in impRoles)
                 {
+                    // Assign special impostor role based on chance and availability
                     if (RNG() <= GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(kvp.Key) && kvp.Value > 0)
                     {
-                        ImpostorMultiplier[Utils.GetHashPuid(pc)] += 15;
+                        ImpostorMultiplier[Utils.GetHashPuid(pc)] += 15; // Increase chance of being crewmate next game
                         ImpostorRoles[kvp.Key]--;
                         Impostors.Add(pc);
                         pc.RpcSetRole(kvp.Key);
 
-                        // Desync role to other clients to prevent revealing the true role
+                        // Desync role to hide special role from non-BAU players
                         if (BetterGameSettings.DesyncRoles.GetBool())
                         {
                             if (kvp.Key is not RoleTypes.Phantom or RoleTypes.Viper)
@@ -159,6 +168,7 @@ internal static class RoleManagerPatch
                     }
                 }
 
+                // If no special role assigned, give regular impostor
                 if (!Impostors.Contains(pc))
                 {
                     ImpostorMultiplier[Utils.GetHashPuid(pc)] += 15;
@@ -167,19 +177,20 @@ internal static class RoleManagerPatch
                     Logger_.LogPrivate($"Assigned {RoleTypes.Impostor.GetRoleName()} role to {pc.Data.PlayerName}", "RoleManager");
                 }
             }
-            else
+            else // Assign crewmate role
             {
                 var crewRoles = CrewmateRoles.Shuffle();
                 foreach (var kvp in crewRoles)
                 {
+                    // Assign special crewmate role based on chance and availability
                     if (RNG() <= GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetChancePerGame(kvp.Key) && kvp.Value > 0)
                     {
-                        ImpostorMultiplier[Utils.GetHashPuid(pc)] = 0;
+                        ImpostorMultiplier[Utils.GetHashPuid(pc)] = 0; // Reset impostor chance
                         CrewmateRoles[kvp.Key]--;
                         Crewmates.Add(pc);
                         pc.RpcSetRole(kvp.Key);
 
-                        // Desync role to other clients to prevent revealing the true role
+                        // Desync role to hide special role from non-BAU players
                         if (BetterGameSettings.DesyncRoles.GetBool())
                         {
                             if (kvp.Key is not RoleTypes.Noisemaker)
@@ -196,6 +207,7 @@ internal static class RoleManagerPatch
                     }
                 }
 
+                // If no special role assigned, give regular crewmate
                 if (!Crewmates.Contains(pc))
                 {
                     ImpostorMultiplier[Utils.GetHashPuid(pc)] = 0;
@@ -213,6 +225,7 @@ internal static class RoleManagerPatch
     {
         Logger_.LogHeader($"Better Role Assignment Has Started", "RoleManager");
 
+        // Get impostor count from BAU settings (defaults to 1)
         int NumImpostors = BetterGameSettings.HideAndSeekImpNum?.GetInt() ?? 1;
 
         if (NumImpostors > BAUPlugin.AllPlayerControls.Count)
@@ -222,7 +235,7 @@ internal static class RoleManagerPatch
         List<NetworkedPlayerInfo> Crewmates = [];
         List<NetworkedPlayerInfo> CrewAndImps() => [.. Impostors, .. Crewmates];
 
-        // Set imp from settings
+        // Get predefined impostors from settings (host can set specific players as impostors)
         int[] betterImpostorSettings =
         [
             GameOptionsManager.Instance.currentHideNSeekGameOptions.ImpostorPlayerID,
@@ -250,7 +263,7 @@ internal static class RoleManagerPatch
             }
         }
 
-        // Get players in random order
+        // Shuffle remaining players for random role assignment
         List<PlayerControl> players = [.. BAUPlugin.AllPlayerControls.Where(player => !CrewAndImps().Contains(player.Data))];
 
         int n = players.Count;
@@ -263,7 +276,7 @@ internal static class RoleManagerPatch
             players[n] = value;
         }
 
-        // Assign roles
+        // Assign roles to remaining players
         foreach (PlayerControl pc in players)
         {
             if (pc == null || pc.roleAssigned == true) continue;
@@ -280,6 +293,7 @@ internal static class RoleManagerPatch
             }
         }
 
+        // Apply roles to all players
         foreach (var data in Impostors)
         {
             var player = Utils.PlayerFromPlayerId(data.PlayerId);
@@ -299,6 +313,7 @@ internal static class RoleManagerPatch
     [HarmonyPrefix]
     internal static bool RoleManager_AssignRoleOnDeath_Prefix(PlayerControl player)
     {
+        // Track available ghost roles
         Dictionary<RoleTypes, int> GhostRoles = new() // Role, Amount
         {
             { RoleTypes.GuardianAngel, 0 },
@@ -311,6 +326,7 @@ internal static class RoleManagerPatch
             GhostRoles[role] = GameOptionsManager.Instance.CurrentGameOptions.RoleOptions.GetNumPerGame(role);
         }
 
+        // Deduct roles already assigned to dead players
         foreach (var allDeadPlayers in BAUPlugin.AllPlayerControls.Where(pc => !pc.IsAlive()))
         {
             for (int i = 0; i < Roles.Count; i++)
@@ -324,6 +340,7 @@ internal static class RoleManagerPatch
 
         var ghostRoles = GhostRoles.Shuffle();
 
+        // Assign ghost role based on chance and availability
         foreach (var kvp in ghostRoles)
         {
             if (player.IsImpostorTeam() && kvp.Key is RoleTypes.GuardianAngel) continue;
@@ -332,7 +349,7 @@ internal static class RoleManagerPatch
             {
                 player.RpcSetRole(kvp.Key);
 
-                // Desync role to other clients to prevent revealing the true role
+                // Desync ghost role to hide it from non-BAU players
                 if (BetterGameSettings.DesyncRoles.GetBool())
                 {
                     List<MessageWriter> messageWriter = AmongUsClient.Instance.StartRpcDesync(player.NetId, (byte)RpcCalls.SetRole, SendOption.None, player.GetClientId(), clientCheck);
@@ -345,6 +362,7 @@ internal static class RoleManagerPatch
             }
         }
 
+        // Assign default ghost role if no special role available
         player.RpcSetRole(player.Data.Role.DefaultGhostRole);
 
         return false;
@@ -352,14 +370,15 @@ internal static class RoleManagerPatch
 
     internal static int RNG()
     {
+        // Choose random number generator based on settings
         switch (BetterGameSettings.RoleRandomizer.GetStringValue())
         {
             case 1:
-                return UnityEngine.Random.Range(0, 100);
+                return UnityEngine.Random.Range(0, 100); // Unity RNG
 
             default:
                 Random Random = new Random();
-                return Random.Next(0, 100);
+                return Random.Next(0, 100); // .NET RNG
         }
     }
 }

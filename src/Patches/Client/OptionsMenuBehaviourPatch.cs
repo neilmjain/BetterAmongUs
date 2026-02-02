@@ -21,8 +21,13 @@ internal static class OptionsMenuBehaviourPatch
     [HarmonyPostfix]
     private static void Start_Postfix(OptionsMenuBehaviour __instance)
     {
+        // Create custom "Better Options" tab in settings menu
         BetterOptionsTab = CreateTabPage(__instance, Translator.GetString("BetterOption"));
+
+        // Populate the tab with all BAU client options
         SetupAllClientOptions(__instance);
+
+        // Reposition tabs to fit new Better Options tab
         UpdateTabPositions(__instance);
     }
 
@@ -30,6 +35,7 @@ internal static class OptionsMenuBehaviourPatch
     {
         if (__instance.DisableMouseMovement == null) return;
 
+        // Clear previous client options to prevent duplicates
         ClientOptionItem.ClientOptions.Clear();
 
         // Toggle options with config binding
@@ -47,6 +53,7 @@ internal static class OptionsMenuBehaviourPatch
         // Button options (no toggle)
         ClientOptionItem.CreateButton(Translator.GetString("BetterOption.SaveData"), __instance, OpenSaveData, () =>
         {
+            // Only allow opening save data in lobby/main menu, not during gameplay
             bool cannotOpen = GameState.IsInGame && !GameState.IsLobby;
             if (cannotOpen)
             {
@@ -57,6 +64,7 @@ internal static class OptionsMenuBehaviourPatch
 
         ClientOptionItem.CreateButton(Translator.GetString("BetterOption.ToVanilla"), __instance, SwitchToVanilla, () =>
         {
+            // Prevent switching to vanilla while in a game
             bool cannotSwitch = GameState.IsInGame;
             if (cannotSwitch)
             {
@@ -68,6 +76,7 @@ internal static class OptionsMenuBehaviourPatch
 
     private static void SwitchToVanilla()
     {
+        // Clean up BAU mod components and return to vanilla Among Us
         ConsoleManager.DetachConsole();
         BetterNotificationManager.BAUNotificationManagerObj?.DestroyObj();
         Harmony.UnpatchAll();
@@ -77,6 +86,7 @@ internal static class OptionsMenuBehaviourPatch
 
     private static void SendBetterRpcAction()
     {
+        // Resend handshake secret to all other players when option is toggled
         if (!GameState.IsInGame) return;
 
         foreach (var player in BAUPlugin.AllPlayerControls)
@@ -88,6 +98,7 @@ internal static class OptionsMenuBehaviourPatch
 
     private static void ClearNotifications()
     {
+        // Clear all active notifications when option is toggled
         BetterNotificationManager.NotifyQueue.Clear();
         BetterNotificationManager.showTime = 0f;
         BetterNotificationManager.Notifying = false;
@@ -95,6 +106,7 @@ internal static class OptionsMenuBehaviourPatch
 
     private static void ToggleLobbyTheme()
     {
+        // Play lobby theme music if re-enabled while in lobby
         if (GameState.IsLobby && !BAUPlugin.DisableLobbyTheme.Value)
         {
             SoundManager.instance.CrossFadeSound("MapTheme", LobbyBehaviour.Instance.MapTheme, 0.5f, 1.5f);
@@ -103,11 +115,13 @@ internal static class OptionsMenuBehaviourPatch
 
     private static void UpdateFrameRate()
     {
+        // Toggle between 60 FPS (default) and 165 FPS
         Application.targetFrameRate = BAUPlugin.UnlockFPS.Value ? 165 : 60;
     }
 
     private static void OpenSaveData()
     {
+        // Open BAU save data folder in file explorer
         if (!File.Exists(BetterDataManager.dataPath)) return;
 
         Process.Start(new ProcessStartInfo
@@ -120,6 +134,7 @@ internal static class OptionsMenuBehaviourPatch
 
     private static TabGroup CreateTabPage(OptionsMenuBehaviour __instance, string name)
     {
+        // Clone last tab as template for new Better Options tab
         var tabPrefab = __instance.Tabs[^1];
         var tab = UnityEngine.Object.Instantiate(tabPrefab, tabPrefab.transform.parent);
 
@@ -128,15 +143,18 @@ internal static class OptionsMenuBehaviourPatch
         tab.GetComponentInChildren<TextMeshPro>(true)?.SetText(name);
         tab.gameObject.SetActive(true);
 
+        // Create content container for the new tab
         var content = new GameObject($"{name}Tab");
         content.SetActive(false);
         content.transform.SetParent(tab.Content.transform.parent);
         content.transform.localScale = Vector3.one;
         tab.Content = content;
 
+        // Add new tab to the tabs array
         var tabs = new List<TabGroup>(__instance.Tabs) { tab };
         __instance.Tabs = tabs.ToArray();
 
+        // Set up click handler for the tab button
         var index = __instance.Tabs.Length - 1;
         var button = tab.GetComponent<PassiveButton>();
         button.OnClick = new();
@@ -151,10 +169,12 @@ internal static class OptionsMenuBehaviourPatch
 
     private static void UpdateTabPositions(OptionsMenuBehaviour __instance)
     {
+        // Position tabs based on game state (in-game vs main menu)
         Vector3 basePos = new(0f, !GameState.InGame ? 0 : 2.5f, -1f);
         const float buttonSpacing = 0.6f;
         const float buttonWidth = 1.0f;
 
+        // Count only active tabs
         int activeCount = 0;
         foreach (var tabButton in __instance.Tabs)
         {
@@ -163,9 +183,11 @@ internal static class OptionsMenuBehaviourPatch
 
         if (activeCount == 0) return;
 
+        // Calculate total width needed for all active tabs
         float totalWidth = (activeCount - 1) * buttonSpacing + activeCount * buttonWidth;
         float startX = basePos.x - (totalWidth / 2f) + (buttonWidth / 2f);
 
+        // Position each active tab evenly spaced
         int activeIndex = 0;
         foreach (var tabButton in __instance.Tabs)
         {
