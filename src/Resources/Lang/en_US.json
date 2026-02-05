@@ -87,6 +87,7 @@
   "BetterSetting.Setting.ShowRoleForClients": "Show role in name for clients",
   "BetterSetting.Setting.CensorDetectionReason": "Censor detection reason",
   "BetterSetting.Setting.DetectedLevelAbove": "Detected player levels >",
+  "BetterSetting.Setting.KickLevelBelow": "Kick player levels <",
   "BetterSetting.Setting.DetectCheatClients": "Detect cheat clients",
   "BetterSetting.Setting.DetectInvalidRPCs": "Detect invalid RPCs",
   "BetterSetting.Setting.RoleRandomizer": "Randomizer",

@@ -19,6 +19,7 @@ class BetterGameSettings
     internal static OptionCheckboxItem? UseBanWordListOnlyLobby;
     internal static OptionIntItem? HideAndSeekImpNum;
     internal static OptionIntItem? DetectedLevelAbove;
+    internal static OptionIntItem? KickLevelBelow;
     internal static OptionCheckboxItem? DetectCheatClients;
     internal static OptionCheckboxItem? DetectInvalidRPCs;
     internal static OptionStringItem? RoleRandomizer;
@@ -44,7 +45,7 @@ internal static class GameSettingsPatch
 
     internal static void SetupSettings(bool IsPreload = false)
     {
-        // Use 1700 next ID
+        // Use 1800 next ID
 
         BetterSettingsTab = OptionTab.Create(3, "BetterSetting", "BetterSetting.Description", Color.green);
 
@@ -71,6 +72,7 @@ internal static class GameSettingsPatch
             OptionTitleItem.Create(BetterSettingsTab, "BetterSetting.TextHeader.Detections");
             BetterGameSettings.CensorDetectionReason = OptionCheckboxItem.Create(1300, BetterSettingsTab, "BetterSetting.Setting.CensorDetectionReason", false);
             BetterGameSettings.DetectedLevelAbove = OptionIntItem.Create(600, BetterSettingsTab, "BetterSetting.Setting.DetectedLevelAbove", (100, 10000, 5), 500, ("Lv ", ""));
+            BetterGameSettings.KickLevelBelow = OptionIntItem.Create(1700, BetterSettingsTab, "BetterSetting.Setting.KickLevelBelow", (0, 10000, 1), 0, ("Lv ", ""));
             BetterGameSettings.DetectCheatClients = OptionCheckboxItem.Create(700, BetterSettingsTab, "BetterSetting.Setting.DetectCheatClients", true);
             BetterGameSettings.DetectInvalidRPCs = OptionCheckboxItem.Create(800, BetterSettingsTab, "BetterSetting.Setting.DetectInvalidRPCs", true);
         }
