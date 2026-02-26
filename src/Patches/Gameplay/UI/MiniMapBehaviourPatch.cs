@@ -1,4 +1,6 @@
 ﻿using BetterAmongUs.Helpers;
+using BetterAmongUs.Modules;
+using BetterAmongUs.Modules.Support;
 using HarmonyLib;
 using UnityEngine;
 
@@ -42,6 +44,8 @@ internal static class MiniMapBehaviourPatch
     [HarmonyPostfix]
     private static void MapBehaviour_Show_Postfix(MapBehaviour __instance)
     {
+        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_MinimapIcons)) return;
+
         if (_icons == null)
         {
             var icons = new GameObject("Icons")
@@ -53,7 +57,6 @@ internal static class MiniMapBehaviourPatch
             icons.transform.localScale = Vector3.one;
             _icons = icons.transform;
 
-            CalculateAllVentGroups();
             foreach (var vent in BAUPlugin.AllVents)
             {
                 CreateVentIcon(vent);
@@ -82,7 +85,7 @@ internal static class MiniMapBehaviourPatch
     private static void CreateVentIcon(Vent vent)
     {
         var icon = CreateIcon(Utils.LoadSprite("BetterAmongUs.Resources.Images.Icons.Vent.png", 280), "VentIcon");
-        icon.color = GetVentGroupColor(vent) * 0.8f;
+        icon.color = VentGroups.GetVentGroupColor(vent) * 0.8f;
 
         SetPosFromShip(vent.transform.position, icon.transform, new Vector3(0f, 0f, VentLayerOffset));
 
@@ -97,7 +100,7 @@ internal static class MiniMapBehaviourPatch
             if (neighborVent)
             {
                 var arrowIcon = CreateIcon(Utils.LoadSprite("BetterAmongUs.Resources.Images.Icons.Arrow.png", 500), "VentArrowIcon");
-                arrowIcon.color = GetVentGroupColor(neighborVent);
+                arrowIcon.color = VentGroups.GetVentGroupColor(neighborVent);
                 arrowIcon.transform.SetParent(icon.transform);
 
                 Vector3 directionToNeighbor = neighborVent.transform.position - vent.transform.position;
@@ -176,94 +179,6 @@ internal static class MiniMapBehaviourPatch
             icon.transform.localScale = Vector3.one * 0.35f;
             SetPosFromShip(usable.Cast<MonoBehaviour>().transform.position, icon.transform, new Vector3(0f, 0f, UsableLayerOffset));
         }
-    }
-
-    private static Dictionary<int, int> ventToLowestId = [];
-    private static Dictionary<int, Color> groupColors = [];
-
-    private static void CalculateAllVentGroups()
-    {
-        ventToLowestId.Clear();
-        groupColors.Clear();
-
-        HashSet<Vent> unprocessedVents = [.. BAUPlugin.AllVents];
-
-        HashSet<int> groupLowestIds = [];
-        Dictionary<int, List<Vent>> groups = [];
-
-        while (unprocessedVents.Count > 0)
-        {
-            Vent startVent = unprocessedVents.First();
-
-            HashSet<Vent> group = [];
-            Queue<Vent> toVisit = new();
-            int lowestId = startVent.Id;
-
-            toVisit.Enqueue(startVent);
-
-            while (toVisit.Count > 0)
-            {
-                Vent current = toVisit.Dequeue();
-                if (group.Contains(current)) continue;
-
-                group.Add(current);
-                unprocessedVents.Remove(current);
-
-                if (current.Id < lowestId)
-                {
-                    lowestId = current.Id;
-                }
-
-                Vent[] connections = { current.Left, current.Right, current.Center };
-                foreach (var connection in connections)
-                {
-                    if (connection != null && !group.Contains(connection) && !toVisit.Contains(connection))
-                    {
-                        toVisit.Enqueue(connection);
-                    }
-                }
-            }
-
-            groupLowestIds.Add(lowestId);
-            groups[lowestId] = [.. group];
-        }
-
-        Color[] colorGroups =
-        [
-            Color.red,
-            Color.green,
-            Color.blue,
-            Color.gray,
-            Color.magenta,
-            Color.cyan,
-            Color.white
-        ];
-
-        for (int i = 0; i < groupLowestIds.Count; i++)
-        {
-            int lowestId = groupLowestIds.ElementAt(i);
-            int colorIndex = i % colorGroups.Length;
-            groupColors[lowestId] = colorGroups[colorIndex] + (new Color(1f, 1f, 1f, 0f) * 0.2f);
-        }
-
-        foreach (var kvp in groups)
-        {
-            int lowestId = kvp.Key;
-            foreach (var vent in kvp.Value)
-            {
-                ventToLowestId[vent.Id] = lowestId;
-            }
-        }
-    }
-
-    private static Color GetVentGroupColor(Vent vent)
-    {
-        if (ventToLowestId.TryGetValue(vent.Id, out int lowestId))
-        {
-            return groupColors[lowestId];
-        }
-
-        return Color.black;
     }
 
     private static SpriteRenderer CreateIcon(Sprite sprite, string name = "Icon")
