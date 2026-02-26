@@ -2,11 +2,29 @@
 
 namespace BetterAmongUs.Modules;
 
+/// <summary>
+/// Provides functionality for grouping vents and assigning colors to vent groups.
+/// </summary>
 internal static class VentGroups
 {
+    /// <summary>
+    /// Dictionary mapping each vent ID to the lowest ID in its group.
+    /// </summary>
     private static readonly Dictionary<int, int> ventToLowestId = [];
+
+    /// <summary>
+    /// Dictionary mapping group IDs (lowest vent ID in the group) to their assigned colors.
+    /// </summary>
     private static readonly Dictionary<int, Color> groupColors = [];
 
+    /// <summary>
+    /// Calculates all vent groups by performing a breadth-first search through connected vents.
+    /// </summary>
+    /// <param name="vents">Array of all vents in the scene to process.</param>
+    /// <remarks>
+    /// Groups vents that are connected via Left, Right, or Center references.
+    /// Each group is assigned a color, and the lowest vent ID in the group becomes the group identifier.
+    /// </remarks>
     internal static void CalculateAllVentGroups(Vent[] vents)
     {
         ventToLowestId.Clear();
@@ -82,6 +100,13 @@ internal static class VentGroups
         }
     }
 
+    /// <summary>
+    /// Gets the group color for a specific vent.
+    /// </summary>
+    /// <param name="vent">The vent to get the group color for.</param>
+    /// <returns>
+    /// The color assigned to the vent's group, or <see cref="Color.black"/> if the vent hasn't been processed.
+    /// </returns>
     internal static Color GetVentGroupColor(Vent vent)
     {
         if (ventToLowestId.TryGetValue(vent.Id, out int lowestId))

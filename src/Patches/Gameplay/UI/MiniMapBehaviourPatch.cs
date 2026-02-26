@@ -1,6 +1,7 @@
 ﻿using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
 using BetterAmongUs.Modules.Support;
+using BetterAmongUs.Mono;
 using HarmonyLib;
 using UnityEngine;
 
@@ -46,6 +47,12 @@ internal static class MiniMapBehaviourPatch
     {
         if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_MinimapIcons)) return;
 
+        foreach (var button in __instance.infectedOverlay.allButtons)
+        {
+            button.spriteRenderer.color = new Color(1f, 1f, 1f, 0.8f);
+            button.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
+        }
+
         if (_icons == null)
         {
             var icons = new GameObject("Icons")
@@ -79,19 +86,40 @@ internal static class MiniMapBehaviourPatch
                 icon.transform.localScale = Vector3.one * 0.25f;
                 SetPosFromShip(zipline.transform.position, icon.transform, new Vector3(0f, 0.16f, UsableLayerOffset));
             }
+
+            foreach (var console in UnityEngine.Object.FindObjectsOfType<Console>())
+            {
+                foreach (var taskType in console.TaskTypes)
+                {
+                    if (taskType is TaskTypes.FixLights or TaskTypes.FixComms or TaskTypes.RestoreOxy or TaskTypes.ResetReactor or TaskTypes.ResetSeismic)
+                    {
+                        var icon = CreateIcon(console.Image.sprite, "ConsoleIcon");
+                        icon.color = Color.white * 0.7f;
+                        icon.transform.localScale = Vector3.one * 0.5f;
+                        SetPosFromShip(console.transform.position, icon.transform, new Vector3(0f, 0f, UsableLayerOffset));
+                        var animatedMapIcon = icon.gameObject.AddComponent<AnimatedMapIcon>();
+                        animatedMapIcon.ShouldAnimate += () =>
+                        {
+                            return console.FindTask(PlayerControl.LocalPlayer) != null;
+                        };
+                        break;
+                    }
+                }
+            }
         }
     }
 
     private static void CreateVentIcon(Vent vent)
     {
-        var icon = CreateIcon(Utils.LoadSprite("BetterAmongUs.Resources.Images.Icons.Vent.png", 280), "VentIcon");
-        icon.color = VentGroups.GetVentGroupColor(vent) * 0.8f;
+        var icon = CreateIcon(Utils.LoadSprite("BetterAmongUs.Resources.Images.Icons.Vent.png", 380), "VentIcon");
+        var color = VentGroups.GetVentGroupColor(vent);
+        icon.color = new Color(color.r, color.g, color.b, 0.7f);
 
         SetPosFromShip(vent.transform.position, icon.transform, new Vector3(0f, 0f, VentLayerOffset));
 
         Vent[] nearbyVents = [vent.Left, vent.Right, vent.Center];
-        float maxSpreadShift = 1f;
-        float minSpreadShift = 0.3f;
+        float maxSpreadShift = 0.5f;
+        float minSpreadShift = 0.2f;
         float closeDistance = 10f;
 
         for (int i = 0; i < nearbyVents.Length; i++)
@@ -99,7 +127,7 @@ internal static class MiniMapBehaviourPatch
             Vent neighborVent = nearbyVents[i];
             if (neighborVent)
             {
-                var arrowIcon = CreateIcon(Utils.LoadSprite("BetterAmongUs.Resources.Images.Icons.Arrow.png", 500), "VentArrowIcon");
+                var arrowIcon = CreateIcon(Utils.LoadSprite("BetterAmongUs.Resources.Images.Icons.Arrow.png", 600), "VentArrowIcon");
                 arrowIcon.color = VentGroups.GetVentGroupColor(neighborVent);
                 arrowIcon.transform.SetParent(icon.transform);
 
@@ -158,7 +186,7 @@ internal static class MiniMapBehaviourPatch
             if (systemConsole.MinigamePrefab.name == "EmergencyMinigame")
             {
                 var icon = CreateIcon(Utils.LoadSprite("BetterAmongUs.Resources.Images.Icons.Meeting.png", 500), "MeetingIcon");
-                icon.color = Color.white * 0.7f;
+                icon.color = new Color(1f, 1f, 1f, 0.7f);
                 icon.transform.localScale = Vector3.one * 0.35f;
                 SetPosFromShip(usable.Cast<MonoBehaviour>().transform.position, icon.transform, new Vector3(0f, 0f, UsableLayerOffset));
                 return;
@@ -175,7 +203,7 @@ internal static class MiniMapBehaviourPatch
         if (HudManager.Instance.UseButton.fastUseSettings.TryGetValue(usable.UseIcon, out var settings))
         {
             var icon = CreateIcon(settings.Image, "UsableIcon");
-            icon.color = Color.white * 0.7f;
+            icon.color = new Color(1f, 1f, 1f, 0.7f);
             icon.transform.localScale = Vector3.one * 0.35f;
             SetPosFromShip(usable.Cast<MonoBehaviour>().transform.position, icon.transform, new Vector3(0f, 0f, UsableLayerOffset));
         }
