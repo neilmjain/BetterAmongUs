@@ -29,10 +29,28 @@ internal static class MiniMapBehaviourPatch
     private static void MapBehaviour_ShowSabotageMap_Postfix(MapBehaviour __instance)
         => __instance.ColorControl.SetColor(new Color(1f, 0.3f, 0f, 1f));
 
-    [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.ShowCountOverlay))]
+    [HarmonyPatch(typeof(MapCountOverlay), nameof(MapCountOverlay.OnEnable))]
     [HarmonyPostfix]
-    private static void MapBehaviour_ShowCountOverlay_Postfix(MapBehaviour __instance)
-        => __instance.ColorControl.SetColor(new Color(0.2f, 0.5f, 0f, 1f));
+    private static void MapCountOverlay_OnEnable_Postfix(MapCountOverlay __instance)
+    => __instance.BackgroundColor.SetColor(PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer) ? Palette.DisabledGrey : new Color(0.2f, 0.5f, 0f, 1f));
+
+    [HarmonyPatch(typeof(MapCountOverlay), nameof(MapCountOverlay.Update))]
+    [HarmonyPrefix]
+    private static void MapCountOverlay_Update_Prefix(MapCountOverlay __instance)
+    {
+        if (PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer))
+        {
+            __instance.isSab = true;
+            __instance.BackgroundColor.SetColor(Palette.DisabledGrey);
+            __instance.SabotageText.gameObject.SetActive(true);
+        }
+        else if (!PlayerTask.PlayerHasTaskOfType<IHudOverrideTask>(PlayerControl.LocalPlayer))
+        {
+            __instance.isSab = false;
+            __instance.BackgroundColor.SetColor(new Color(0.2f, 0.5f, 0f, 1f));
+            __instance.SabotageText.gameObject.SetActive(false);
+        }
+    }
 
     [HarmonyPatch(typeof(MapConsole), nameof(MapConsole.Use))]
     [HarmonyPostfix]
