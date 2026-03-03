@@ -1,6 +1,6 @@
-﻿using BetterAmongUs.Data;
+using BetterAmongUs.Data;
 using BetterAmongUs.Helpers;
-using BetterAmongUs.Modules.Support;
+
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -31,7 +31,7 @@ public abstract class OptionItem
     internal virtual bool Show => ShowCondition.Invoke();
     internal virtual bool ShowChildren => Show;
     internal Func<bool>? ShowCondition = () => { return true; };
-    internal bool Hide => !Show || GetParents().Any(opt => !opt.ShowChildren) || BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_GameOption + Translation);
+    internal bool Hide => !Show || GetParents().Any(opt => !opt.ShowChildren);
     internal static OptionItem? GetOptionById(int id) => AllOptions.FirstOrDefault(opt => opt._id == id);
     internal virtual void UpdateVisuals(bool updateTabVisuals = true) { }
     public abstract string ValueAsString();
@@ -433,11 +433,6 @@ public abstract class OptionItem<T> : OptionItem
     protected T? DefaultValue { get; set; } = default;
     public virtual T? GetValue()
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_GameOption + Translation))
-        {
-            return DefaultValue;
-        }
-
         return Value;
     }
     internal virtual T? GetDefaultValue() => DefaultValue;

@@ -1,9 +1,9 @@
 using AmongUs.Data;
 using AmongUs.GameOptions;
-using BetterAmongUs.Data;
+
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
-using BetterAmongUs.Patches.Gameplay.UI.Settings;
+
 using BetterAmongUs.Structs;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Attributes;
@@ -144,7 +144,7 @@ internal class PlayerInfoDisplay : MonoBehaviour
     {
         if (_player?.Data == null) return;
 
-        var betterData = _player.BetterData();
+
 
         if (!_player.DataIsCollected())
         {
@@ -177,7 +177,7 @@ internal class PlayerInfoDisplay : MonoBehaviour
 
         if (GameState.IsInGame && GameState.IsLobby && !GameState.IsFreePlay)
         {
-            SetLobbyInfo(ref newName, betterData, _sbTag);
+            SetLobbyInfo(ref newName, _sbTag);
             _sbTagTop.Append($"<color=#9e9e9e>{platform}</color>+++")
                     .Append($"<color=#ffd829>Lv: {_player.Data.PlayerLevel + 1}</color>+++");
 
@@ -185,6 +185,8 @@ internal class PlayerInfoDisplay : MonoBehaviour
         }
         else if ((GameState.IsInGame || GameState.IsFreePlay) && !GameState.IsHideNSeek)
         {
+            // Town of Us Mira-style role name display above the player name
+            SetInGameRoleDisplay(_sbTagTop);
         }
 
         if (!_player.IsInShapeshift())
@@ -196,7 +198,7 @@ internal class PlayerInfoDisplay : MonoBehaviour
         else
         {
             var targetData = Utils.PlayerDataFromPlayerId(_player.shapeshiftTargetPlayerId);
-            var name = targetData.BetterData()?.RealName ?? targetData.PlayerName;
+            var name = targetData.PlayerName;
             if (_player.IsImpostorTeammate())
                 name = name.ToColor(Colors.ImpostorRed);
             if (targetData != null) _player.RawSetName(name);
@@ -290,20 +292,38 @@ internal class PlayerInfoDisplay : MonoBehaviour
     /// <param name="betterData">Extended player data.</param>
     /// <param name="sbTag">StringBuilder for tag text.</param>
     [HideFromIl2Cpp]
-    private void SetLobbyInfo(ref string newName, ExtendedPlayerInfo betterData, StringBuilder sbTag)
+    private void SetLobbyInfo(ref string newName, StringBuilder sbTag)
     {
-        if (betterData == null) return;
-
         if (_player.IsHost() && BAUPlugin.LobbyPlayerInfo.Value)
             newName = _player.GetPlayerNameAndColor();
 
-        if ((_player.IsLocalPlayer() || betterData.IsBetterUser) && !GameState.IsInGamePlay)
-        {
-            string verificationSymbol = betterData.IsVerifiedBetterUser || _player.IsLocalPlayer() ? "✓ " : "";
-            sbTag.AppendFormat("<color=#0dff00>{1}{0}</color>+++",
-                _cachedTranslations.BetterUser, verificationSymbol);
-        }
         sbTag.Append($"<color=#b554ff>ID: {_player.PlayerId}</color>+++");
+    }
+
+    /// <summary>
+    /// Sets in-game role display above the player name, styled after Town of Us Mira.
+    /// Role name is shown in team color (red for Impostor, blue for Crewmate) in bold brackets.
+    /// Only shown to the local player for their own role, or to Impostors for their teammates.
+    /// </summary>
+    /// <param name="sbTagTop">StringBuilder for top tag text.</param>
+    [HideFromIl2Cpp]
+    private void SetInGameRoleDisplay(StringBuilder sbTagTop)
+    {
+        if (_player == null || _player.Data == null) return;
+
+        bool isLocalPlayer = _player.IsLocalPlayer();
+        bool isImpostorTeammate = _player.IsImpostorTeammate();
+
+        // Only show role name if this is our own player, or an impostor teammate we can see
+        if (!isLocalPlayer && !isImpostorTeammate) return;
+
+        string roleName = _player.GetRoleName();
+        if (string.IsNullOrEmpty(roleName)) return;
+
+        string teamColor = _player.GetTeamHexColor();
+
+        // TOU Mira format: bold role name in team color, wrapped in brackets
+        sbTagTop.Append($"<color={teamColor}><b>[{roleName}]</b></color>+++");
     }
 
     /// <summary>

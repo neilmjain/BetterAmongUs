@@ -3,7 +3,6 @@ using BetterAmongUs.Data;
 using BetterAmongUs.Modules;
 using BetterAmongUs.Mono;
 using BetterAmongUs.Patches.Gameplay.Player;
-using BetterAmongUs.Patches.Gameplay.UI.Settings;
 using InnerNet;
 using UnityEngine;
 
@@ -211,16 +210,6 @@ static class PlayerControlHelper
     /// <returns>The role name string.</returns>
     internal static string GetRoleName(this PlayerControl player)
     {
-        if (!player.IsAlive() && !player.IsGhostRole())
-        {
-            return player.BetterData().RoleInfo.DeadDisplayRole.GetRoleName();
-        }
-
-        if (player?.Data != null)
-        {
-            return player.Data.RoleType.GetRoleName();
-        }
-
         return string.Empty;
     }
 
@@ -252,24 +241,7 @@ static class PlayerControlHelper
     /// <returns>The hex color string.</returns>
     internal static string GetTeamHexColor(this PlayerControl player) => player.Data.GetTeamHexColor();
 
-    /// <summary>
-    /// Gets the hex color code for a player data's team.
-    /// </summary>
-    /// <param name="data">The player data to get team color for.</param>
-    /// <returns>The hex color string.</returns>
-    internal static string GetTeamHexColor(this NetworkedPlayerInfo data)
-    {
-        if (data == null) return "#ffffff";
 
-        if (data.IsImpostorTeam())
-        {
-            return Colors.ImpostorRed.ColorToHex();
-        }
-        else
-        {
-            return Colors.CrewmateBlue.ColorToHex();
-        }
-    }
 
     /// <summary>
     /// Checks if a player has a specific role type.
@@ -293,12 +265,7 @@ static class PlayerControlHelper
     /// <returns>True if the player is on the impostor team.</returns>
     internal static bool IsImpostorTeam(this PlayerControl player) => player?.Data?.IsImpostorTeam() == true;
 
-    /// <summary>
-    /// Checks if player data indicates the player is on the impostor team.
-    /// </summary>
-    /// <param name="data">The player data to check.</param>
-    /// <returns>True if the player is on the impostor team.</returns>
-    internal static bool IsImpostorTeam(this NetworkedPlayerInfo data) => data?.RoleType.GetBehaviourPrefab().IsImpostor == true;
+
 
     /// <summary>
     /// Checks if a player is an impostor teammate of the local player.

@@ -1,6 +1,6 @@
-﻿using AmongUs.Data;
+using AmongUs.Data;
 using BetterAmongUs.Modules;
-using BetterAmongUs.Patches.Gameplay.UI.Chat;
+
 using InnerNet;
 using System.Reflection;
 using System.Security.Cryptography;

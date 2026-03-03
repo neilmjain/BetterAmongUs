@@ -1,5 +1,5 @@
 using AmongUs.GameOptions;
-using BetterAmongUs.Data;
+
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
 using BetterAmongUs.Structs;
@@ -259,16 +259,6 @@ internal sealed class MeetingInfoDisplay : PlayerInfoDisplay
     /// <returns>Disconnect reason text.</returns>
     private string GetDisconnectText()
     {
-        var playerData = GameData.Instance.GetPlayerById(_pva.TargetPlayerId);
-        var betterData = playerData?.BetterData();
-
-        return betterData?.DisconnectReason switch
-        {
-            DisconnectReasons.ExitGame => _cachedTranslations.DisconnectLeft,
-            DisconnectReasons.Banned => _cachedTranslations.DisconnectBanned,
-            DisconnectReasons.Kicked => _cachedTranslations.DisconnectKicked,
-
-            _ => _cachedTranslations.DisconnectDefault
-        };
+        return _cachedTranslations.DisconnectDefault;
     }
 }

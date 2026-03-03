@@ -1,5 +1,5 @@
-﻿using BetterAmongUs.Helpers;
-using BetterAmongUs.Modules.Support;
+using BetterAmongUs.Helpers;
+
 using HarmonyLib;
 using System.Text;
 using UnityEngine;

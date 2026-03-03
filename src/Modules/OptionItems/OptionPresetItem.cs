@@ -1,5 +1,5 @@
-﻿using BetterAmongUs.Data;
-using BetterAmongUs.Patches.Gameplay.UI.Settings;
+using BetterAmongUs.Data;
+
 
 namespace BetterAmongUs.Modules.OptionItems;
 

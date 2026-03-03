@@ -1,6 +1,6 @@
 using AmongUs.Data;
 using BetterAmongUs.Modules;
-using BetterAmongUs.Modules.Support;
+
 using Discord;
 using HarmonyLib;
 

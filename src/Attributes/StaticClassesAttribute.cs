@@ -1,4 +1,4 @@
-using BetterAmongUs.Commands;
+
 using System.Reflection;
 
 namespace BetterAmongUs.Attributes;
@@ -54,7 +54,3 @@ internal abstract class StaticInstanceAttribute<T> : InstanceAttribute where T :
     }
 }
 
-// Class instances
-internal sealed class RegisterCommandAttribute : StaticInstanceAttribute<BaseCommand>
-{
-}

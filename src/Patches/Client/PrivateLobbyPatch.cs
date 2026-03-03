@@ -1,6 +1,6 @@
-﻿using BetterAmongUs.Helpers;
+using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
-using BetterAmongUs.Modules.Support;
+
 using HarmonyLib;
 using TMPro;
 using UnityEngine;

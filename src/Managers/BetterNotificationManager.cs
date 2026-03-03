@@ -2,7 +2,7 @@
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
 using BetterAmongUs.Mono;
-using BetterAmongUs.Patches.Gameplay.UI.Settings;
+
 using Cpp2IL.Core.Extensions;
 using TMPro;
 using UnityEngine;

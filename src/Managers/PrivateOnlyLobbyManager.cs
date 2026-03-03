@@ -1,5 +1,4 @@
-﻿using BetterAmongUs.Modules;
-using BetterAmongUs.Patches.Gameplay.UI.Settings;
+
 using HarmonyLib;
 
 namespace BetterAmongUs.Managers;

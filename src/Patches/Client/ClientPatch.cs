@@ -1,8 +1,8 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
+using BepInEx.Unity.IL2CPP.Utils;
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Managers;
 using BetterAmongUs.Modules;
-using BetterAmongUs.Patches.Gameplay.UI.Chat;
+
 using HarmonyLib;
 using InnerNet;
 using System.Collections;

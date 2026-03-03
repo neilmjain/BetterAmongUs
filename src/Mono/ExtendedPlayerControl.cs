@@ -1,5 +1,5 @@
-﻿using BepInEx.Unity.IL2CPP.Utils;
-using BetterAmongUs.Modules;
+using BepInEx.Unity.IL2CPP.Utils;
+
 using HarmonyLib;
 using Il2CppInterop.Runtime.Attributes;
 using System.Collections;
@@ -10,7 +10,7 @@ namespace BetterAmongUs.Mono;
 /// <summary>
 /// Extends PlayerControl with additional functionality.
 /// </summary>
-internal sealed class ExtendedPlayerControl : MonoBehaviour, IMonoExtension<PlayerControl>
+internal sealed class ExtendedPlayerControl : MonoBehaviour
 {
     /// <summary>
     /// Gets or sets the base PlayerControl instance.
@@ -24,7 +24,7 @@ internal sealed class ExtendedPlayerControl : MonoBehaviour, IMonoExtension<Play
 
     private void Awake()
     {
-        if (!this.RegisterExtension()) return;
+        
         this.StartCoroutine(CoAddBetterData());
         _Player.gameObject.AddComponent<PlayerInfoDisplay>().Init(_Player);
     }
@@ -41,25 +41,14 @@ internal sealed class ExtendedPlayerControl : MonoBehaviour, IMonoExtension<Play
             yield return null;
         }
 
-        TryCreateExtendedData(_Player.Data);
+
     }
 
-    /// <summary>
-    /// Attempts to create extended data for a player.
-    /// </summary>
-    /// <param name="data">The player data to extend.</param>
-    internal static void TryCreateExtendedData(NetworkedPlayerInfo data)
-    {
-        if (data.BetterData() == null)
-        {
-            ExtendedPlayerInfo newBetterData = data.gameObject.AddComponent<ExtendedPlayerInfo>();
-            newBetterData.SetInfo(data);
-        }
-    }
+
 
     private void OnDestroy()
     {
-        this.UnregisterExtension();
+        
     }
 
     /// <summary>

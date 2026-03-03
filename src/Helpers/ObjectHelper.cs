@@ -1,4 +1,4 @@
-﻿using BetterAmongUs.Modules.Support;
+﻿
 using UnityEngine;
 
 namespace BetterAmongUs.Helpers;
@@ -8,6 +8,19 @@ namespace BetterAmongUs.Helpers;
 /// </summary>
 internal static class ObjectHelper
 {
+    /// <summary>
+    /// The tint color applied to BAU UI buttons and background sprites.
+    /// Change this single value to retheme all button shader colors at once.
+    /// Examples:
+    ///   Color.green         → default BAU green tint
+    ///   Color.cyan          → teal/cyan tint
+    ///   new Color(0.5f, 0f, 1f)   → purple tint
+    ///   new Color(1f, 0.5f, 0f)   → orange tint
+    ///   Color.white         → no visible tint (restores originals)
+    /// The blend formula is: finalColor = (originalColor × 0.6) + (ButtonTintColor × 0.5)
+    /// Increase the second multiplier in AddColor() for a stronger tint effect.
+    /// </summary>
+    internal static Color ButtonTintColor = Color.green;
     /// <summary>
     /// Destroys a GameObject if it is not null.
     /// </summary>
@@ -112,7 +125,7 @@ internal static class ObjectHelper
     /// <param name="avoidGoName">Names of GameObjects to skip when applying colors.</param>
     internal static void SetUIColors(this GameObject go, Color? color = null, Func<SpriteRenderer, bool>? check = null, params string[] avoidGoName)
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_Theme)) return;
+
 
         var sprites = go.GetComponentsInChildren<SpriteRenderer>(true);
         foreach (var sprite in sprites)
@@ -125,14 +138,15 @@ internal static class ObjectHelper
 
     /// <summary>
     /// Adds a color tint to a SpriteRenderer using a blend formula.
+    /// The tint color is controlled by <see cref="ButtonTintColor"/>.
     /// </summary>
     /// <param name="sprite">The SpriteRenderer to modify.</param>
-    /// <param name="color">The color to blend (defaults to green if null).</param>
+    /// <param name="color">The color to blend (defaults to ButtonTintColor if null).</param>
     internal static void AddColor(SpriteRenderer sprite, Color? color = null)
     {
-        if (BAUModdedSupportFlags.HasFlag(BAUModdedSupportFlags.Disable_Theme)) return;
 
-        color ??= Color.green;
+
+        color ??= ButtonTintColor;
         sprite.color = (sprite.color * 0.6f) + ((Color)color * 0.5f);
     }
 
