@@ -1,9 +1,9 @@
-﻿using AmongUs.InnerNet.GameDataMessages;
+using AmongUs.InnerNet.GameDataMessages;
 using BepInEx.Unity.IL2CPP.Utils;
 using BetterAmongUs.Enums;
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
-using BetterAmongUs.Modules.AntiCheat;
+
 using BetterAmongUs.Mono;
 using BetterAmongUs.Network;
 using BetterAmongUs.Structs;
@@ -139,7 +139,7 @@ internal static class NetworkManager
                 int currentMessageNumber = InnerNetClient.msgNum++;
                 var oldReader = MessageReader.Get(messageReader);
                 InnerNetClient.StartCoroutine(HandleGameDataInner(messageReader, currentMessageNumber));
-                RPCHandler.HandleRPC(parentReader.Tag, null, oldReader, HandlerFlag.HandleGameDataTag);
+
                 oldReader.Recycle();
             }
         }
@@ -418,73 +418,12 @@ internal static class NetworkManager
     /// </summary>
     private static bool HandleInnerNetObject(InnerNetObject netObj, byte callId, MessageReader reader)
     {
-        if (netObj is PlayerControl player)
-        {
-            if (!PlayerRpc(player, callId, reader))
-            {
-                return false;
-            }
-        }
-        else if (netObj is PlayerPhysics physics)
-        {
-            if (!PlayerRpc(physics.myPlayer, callId, reader))
-            {
-                return false;
-            }
-        }
-        else if (netObj is CustomNetworkTransform networkTransform)
-        {
-            if (!PlayerRpc(networkTransform.myPlayer, callId, reader))
-            {
-                return false;
-            }
-        }
+
 
         return true;
     }
 
-    /// <summary>
-    /// Processes RPCs for a player with anti-cheat validation.
-    /// </summary>
-    private static bool PlayerRpc(PlayerControl player, byte callId, MessageReader reader)
-    {
-        if (player.BetterData() != null)
-        {
-            player.BetterData().AntiCheatInfo.RPCSentPS++;
-            if (player.BetterData().AntiCheatInfo.RPCSentPS >= ExtendedAntiCheatInfo.MAX_RPC_SENT)
-            {
-                return false;
-            }
-        }
 
-        BetterAntiCheat.HandleCheatRPCBeforeCheck(player, callId, reader);
 
-        if (BetterAntiCheat.CheckCancelRPC(player, callId, reader) != true)
-        {
-            if (!player.IsLocalPlayer()) Logger_.LogCheat($"RPC canceled by Anti-Cheat: {Enum.GetName((RpcCalls)callId)}{Enum.GetName((CustomRPC)callId)} - {callId}");
-            return false;
-        }
 
-        BetterAntiCheat.CheckRPC(player, callId, reader);
-        BetterAntiCheat.HandleRPC(player, callId, reader);
-
-        return true;
-    }
-
-    [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.UpdateSystem), typeof(SystemTypes), typeof(PlayerControl), typeof(MessageReader))]
-    internal static class MessageReaderUpdateSystemPatch
-    {
-        internal static bool Prefix([HarmonyArgument(0)] SystemTypes systemType, [HarmonyArgument(1)] PlayerControl player, [HarmonyArgument(2)] MessageReader reader)
-        {
-            player.BetterData().AntiCheatInfo.RPCSentPS++;
-            if (player.BetterData().AntiCheatInfo.RPCSentPS >= ExtendedAntiCheatInfo.MAX_RPC_SENT)
-            {
-                return false;
-            }
-
-            if (BetterAntiCheat.RpcUpdateSystemCheck(player, systemType, reader) != true) return false;
-
-            return true;
-        }
-    }
 }

@@ -1,4 +1,4 @@
-﻿namespace BetterAmongUs.Enums;
+namespace BetterAmongUs.Enums;
 
 /// <summary>
 /// Defines handler flags used to control the processing flow of network messages and cheat detection.
@@ -10,20 +10,7 @@ internal enum HandlerFlag
     /// </summary>
     Handle,
 
-    /// <summary>
-    /// Indicates the message should be checked for cheat RPC signatures.
-    /// </summary>
-    CheatRpcCheck,
 
-    /// <summary>
-    /// Indicates that cheat detection processing should be cancelled.
-    /// </summary>
-    AntiCheatCancel,
-
-    /// <summary>
-    /// Indicates the message should be processed by the anti-cheat system.
-    /// </summary>
-    AntiCheat,
 
     /// <summary>
     /// Indicates the host is using BetterAmongUs.

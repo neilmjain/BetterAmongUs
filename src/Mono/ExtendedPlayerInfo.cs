@@ -2,6 +2,7 @@
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Managers;
 using BetterAmongUs.Modules;
+
 using Il2CppInterop.Runtime.Attributes;
 using InnerNet;
 using UnityEngine;
@@ -15,7 +16,6 @@ internal sealed class ExtendedPlayerInfo : MonoBehaviour, IMonoExtension<Network
 {
     internal ExtendedPlayerInfo()
     {
-        HandshakeHandler = new(this);
     }
 
     /// <summary>
@@ -47,7 +47,6 @@ internal sealed class ExtendedPlayerInfo : MonoBehaviour, IMonoExtension<Network
     private void Awake()
     {
         if (!this.RegisterExtension()) return;
-        HandshakeHandler.WaitSendSecretToPlayer();
     }
 
     private void OnDestroy()
@@ -55,42 +54,8 @@ internal sealed class ExtendedPlayerInfo : MonoBehaviour, IMonoExtension<Network
         this.UnregisterExtension();
     }
 
-    /// <summary>
-    /// Updates anti-cheat monitoring and state tracking.
-    /// </summary>
-    internal void Update()
-    {
-        var time = Time.deltaTime;
 
-        AntiCheatInfo.TimeSinceLastTask += time;
 
-        if (AntiCheatInfo.RPCSentPS > 0)
-        {
-            bool flag = _Data.IsCheater();
-
-            if (AntiCheatInfo.RPCSentPS >= ExtendedAntiCheatInfo.MAX_RPC_SENT && !flag)
-            {
-                BetterNotificationManager.NotifyCheat(_Data.Object,
-                    Translator.GetString("AntiCheat.Reason.RPCSentPS"),
-                    Translator.GetString("AntiCheat.UnauthorizedAction")
-                );
-                Logger_.LogCheat($"{_Data.Object.BetterData().RealName} {AntiCheatInfo.RPCSentPS} Sent.");
-            }
-
-            timeAccumulator += time;
-            if (timeAccumulator >= 0.25f - 0.005 * AntiCheatInfo.RPCSentPS)
-            {
-                AntiCheatInfo.RPCSentPS -= 1;
-                timeAccumulator = 0f;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Gets the handshake handler for this player.
-    /// </summary>
-    [HideFromIl2Cpp]
-    internal HandshakeHandler HandshakeHandler { get; }
 
     /// <summary>
     /// Gets the player ID.
@@ -134,74 +99,6 @@ internal sealed class ExtendedPlayerInfo : MonoBehaviour, IMonoExtension<Network
     [HideFromIl2Cpp]
     internal ExtendedRoleInfo? RoleInfo { get; } = new();
 
-    /// <summary>
-    /// Gets the extended anti-cheat information.
-    /// </summary>
-    [HideFromIl2Cpp]
-    internal ExtendedAntiCheatInfo? AntiCheatInfo { get; } = new();
-}
-
-/// <summary>
-/// Contains anti-cheat monitoring information for a player.
-/// </summary>
-internal class ExtendedAntiCheatInfo
-{
-    /// <summary>
-    /// Maximum allowed RPCs per second.
-    /// </summary>
-    internal const int MAX_RPC_SENT = 50;
-
-    /// <summary>
-    /// Gets or sets whether the player is banned by anti-cheat.
-    /// </summary>
-    internal bool BannedByAntiCheat { get; set; } = false;
-
-    /// <summary>
-    /// Gets or sets the list of AUM chat messages.
-    /// </summary>
-    internal List<string> AUMChats { get; set; } = [];
-
-    /// <summary>
-    /// Gets or sets the RPCs sent per second.
-    /// </summary>
-    internal int RPCSentPS { get; set; } = 0;
-
-    /// <summary>
-    /// Gets or sets the number of times attempted to kill.
-    /// </summary>
-    internal int TimesAttemptedKilled { get; set; } = 0;
-
-    /// <summary>
-    /// Gets or sets the number of open sabotages.
-    /// </summary>
-    internal int OpenSabotageNum { get; set; } = 0;
-
-    /// <summary>
-    /// Gets whether the player is fixing panel sabotage.
-    /// </summary>
-    internal bool IsFixingPanelSabotage => OpenSabotageNum != 0;
-
-    /// <summary>
-    /// Gets or sets the time since last task.
-    /// </summary>
-    internal float TimeSinceLastTask { get; set; } = 5f;
-
-    /// <summary>
-    /// Gets or sets the last task ID.
-    /// </summary>
-    internal uint LastTaskId { get; set; } = 999;
-
-    /// <summary>
-    /// Gets or sets whether the player has set their name.
-    /// </summary>
-    internal bool HasSetName { get; set; }
-
-    /// <summary>
-    /// Gets or sets whether the player has set their level.
-    /// </summary>
-    internal bool HasSetLevel { get; set; }
-}
-
 /// <summary>
 /// Contains extended role information for a player.
 /// </summary>
@@ -221,6 +118,7 @@ internal class ExtendedRoleInfo
     /// Gets or sets the role to display when dead.
     /// </summary>
     internal RoleTypes DeadDisplayRole { get; set; }
+}
 }
 
 /// <summary>

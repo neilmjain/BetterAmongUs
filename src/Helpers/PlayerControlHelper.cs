@@ -1,4 +1,4 @@
-﻿using AmongUs.GameOptions;
+using AmongUs.GameOptions;
 using BetterAmongUs.Data;
 using BetterAmongUs.Modules;
 using BetterAmongUs.Mono;
@@ -87,15 +87,14 @@ static class PlayerControlHelper
     }
 
     /// <summary>
-    /// Kicks a player from the game with optional ban and anti-cheat features.
+    /// Kicks a player from the game with optional ban.
     /// </summary>
     /// <param name="player">The player to kick.</param>
     /// <param name="ban">Whether to ban the player.</param>
     /// <param name="setReasonInfo">Custom reason message for the kick.</param>
-    /// <param name="AntiCheatBan">Whether this is an anti-cheat related kick.</param>
     /// <param name="bypassDataCheck">Whether to bypass the data collection check.</param>
     /// <param name="forceBan">Whether to force a ban regardless of settings.</param>
-    internal static void Kick(this PlayerControl player, bool ban = false, string setReasonInfo = "", bool AntiCheatBan = false, bool bypassDataCheck = false, bool forceBan = false)
+    internal static void Kick(this PlayerControl player, bool ban = false, string setReasonInfo = "", bool bypassDataCheck = false, bool forceBan = false)
     {
         var Ban = ban || forceBan;
 
@@ -104,24 +103,12 @@ static class PlayerControlHelper
             return;
         }
 
-        if (AntiCheatBan)
-        {
-            if (BetterGameSettings.WhenCheating.GetStringValue() == 0 && !forceBan)
-            {
-                return;
-            }
-
-            Ban = (Ban && BetterGameSettings.WhenCheating.GetStringValue() == 2) || forceBan;
-        }
-
         if (setReasonInfo != "")
         {
-            PlayerJoinAndLeftPatch.BetterShowNotification(player.Data, forceReasonText: string.Format(setReasonInfo, Ban ? Translator.GetString("AntiCheat.Ban").ToLower() : Translator.GetString("AntiCheat.Kick").ToLower()));
+            PlayerJoinAndLeftPatch.BetterShowNotification(player.Data, forceReasonText: string.Format(setReasonInfo, Ban ? "Banned" : "Kicked"));
         }
 
         AmongUsClient.Instance.KickPlayer(player.GetClientId(), Ban);
-
-        player.BetterData().AntiCheatInfo.BannedByAntiCheat = AntiCheatBan;
     }
 
     /// <summary>
@@ -323,19 +310,7 @@ static class PlayerControlHelper
         (player.IsLocalPlayer() && PlayerControl.LocalPlayer.IsImpostorTeam() ||
         PlayerControl.LocalPlayer.IsImpostorTeam() && player.IsImpostorTeam());
 
-    /// <summary>
-    /// Checks if a player is listed as a cheater in the anti-cheat database.
-    /// </summary>
-    /// <param name="player">The player to check.</param>
-    /// <returns>True if the player is listed as a cheater.</returns>
-    internal static bool IsCheater(this PlayerControl player) => BetterDataManager.BetterDataFile?.CheckPlayerData(player.Data) == true;
 
-    /// <summary>
-    /// Checks if player data is listed as a cheater in the anti-cheat database.
-    /// </summary>
-    /// <param name="data">The player data to check.</param>
-    /// <returns>True if the player data is listed as a cheater.</returns>
-    internal static bool IsCheater(this NetworkedPlayerInfo data) => BetterDataManager.BetterDataFile?.CheckPlayerData(data) == true;
 
     /// <summary>
     /// Checks if a player is the game host.

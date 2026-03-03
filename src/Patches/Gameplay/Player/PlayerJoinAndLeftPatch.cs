@@ -31,43 +31,7 @@ internal static class PlayerJoinAndLeftPatch
     [HarmonyPostfix]
     private static void AmongUsClient_OnPlayerJoined_Postfix(ClientData data)
     {
-        // Schedule ban list checks 2.5 seconds after player joins
-        LateTask.Schedule(() =>
-        {
-            if (GameState.IsHost)
-            {
-                if (GameState.IsInGame)
-                {
-                    var player = Utils.PlayerFromClientId(data.Id);
 
-                    // Check if player is in ban list by friend code or PUID
-                    if (BetterGameSettings.UseBanPlayerList.GetBool())
-                    {
-                        if (player != null)
-                        {
-                            if (TextFileHandler.CompareStringMatch(BetterDataManager.banPlayerListFile,
-                                BAUPlugin.AllPlayerControls.Select(player => player.Data.FriendCode)
-                                .Concat(BAUPlugin.AllPlayerControls.Select(player => player.GetHashPuid())).ToArray()))
-                            {
-                                player.Kick(true, Translator.GetString("AntiCheat.BanPlayerListMessage"), bypassDataCheck: true);
-                            }
-                        }
-                    }
-
-                    // Check if player name matches banned name patterns
-                    if (BetterGameSettings.UseBanNameList.GetBool())
-                    {
-                        if (player != null)
-                        {
-                            if (TextFileHandler.CompareStringFilters(BetterDataManager.banNameListFile, [player.Data.PlayerName]))
-                            {
-                                player?.Kick(true, Translator.GetString("AntiCheat.BanPlayerListMessage"), bypassDataCheck: true);
-                            }
-                        }
-                    }
-                }
-            }
-        }, 2.5f, "OnPlayerJoinedPatch", false);
     }
 
     [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerLeft))]
@@ -119,7 +83,7 @@ internal static class PlayerJoinAndLeftPatch
     internal static void BetterShowNotification(NetworkedPlayerInfo playerData, DisconnectReasons reason = DisconnectReasons.Unknown, string forceReasonText = "")
     {
         // Prevent showing duplicate notifications
-        if (playerData.BetterData().AntiCheatInfo.BannedByAntiCheat || playerData.BetterData().HasShowDcMsg) return;
+        if (playerData.BetterData().HasShowDcMsg) return;
         playerData.BetterData().HasShowDcMsg = true;
 
         string? playerName = playerData.BetterData().RealName;

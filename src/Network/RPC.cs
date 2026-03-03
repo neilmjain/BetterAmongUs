@@ -1,4 +1,4 @@
-﻿using AmongUs.Data;
+using AmongUs.Data;
 using BetterAmongUs.Enums;
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
@@ -60,16 +60,7 @@ internal static class RPC
             CustomRPC customRPC = (CustomRPC)reader.ReadByte();
             switch (customRPC)
             {
-                case CustomRPC.SendSecretToPlayer:
-                    {
-                        player.BetterData().HandshakeHandler.HandleSecretFromSender(reader);
-                    }
-                    break;
-                case CustomRPC.CheckSecretHashFromPlayer:
-                    {
-                        player.BetterData().HandshakeHandler.HandleSecretHashFromPlayer(reader);
-                    }
-                    break;
+
             }
         }
 
@@ -95,16 +86,7 @@ internal static class RPC
 
             switch (callId)
             {
-                case (byte)CustomRPC.SendSecretToPlayer:
-                    {
-                        player.BetterData().HandshakeHandler.HandleSecretFromSender(reader);
-                    }
-                    break;
-                case (byte)CustomRPC.CheckSecretHashFromPlayer:
-                    {
-                        player.BetterData().HandshakeHandler.HandleSecretHashFromPlayer(reader);
-                    }
-                    break;
+
             }
         }
         else if (!Enum.IsDefined(typeof(CustomRPC), (int)unchecked(callId)))

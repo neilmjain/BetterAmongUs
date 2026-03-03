@@ -1,4 +1,4 @@
-﻿using BetterAmongUs.Data;
+using BetterAmongUs.Data;
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Managers;
 using BetterAmongUs.Modules;
@@ -53,18 +53,6 @@ internal static class InnerNetClientPatch
         return false;
     }
 
-    [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.KickPlayer))]
-    [HarmonyPrefix]
-    private static void InnerNetClient_KickPlayer_Prefix(ref int clientId, ref bool ban)
-    {
-        // When banning a player, add them to BAU's custom ban list if enabled
-        if (ban && BetterGameSettings.UseBanPlayerList.GetBool())
-        {
-            // Get player info from client ID
-            NetworkedPlayerInfo info = Utils.PlayerFromClientId(clientId).Data;
 
-            // Add player to ban list using both friend code and PUID
-            BetterDataManager.AddToBanList(info.FriendCode, info.Puid);
-        }
-    }
+
 }

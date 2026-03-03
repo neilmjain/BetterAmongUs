@@ -1,4 +1,4 @@
-﻿using AmongUs.Data;
+using AmongUs.Data;
 using AmongUs.GameOptions;
 using BetterAmongUs.Data;
 using BetterAmongUs.Helpers;
@@ -32,10 +32,7 @@ internal class PlayerInfoDisplay : MonoBehaviour
     private int _lastUpdateFrame;
     private const int UPDATE_COOLDOWN = 10;
 
-    /// <summary>
-    /// Cached regex pattern for friend code validation.
-    /// </summary>
-    private static readonly Regex _friendCodePattern = new(@"^[a-zA-Z0-9#]+$", RegexOptions.Compiled);
+
 
     private CachedTranslations _cachedTranslations = new();
 
@@ -57,7 +54,6 @@ internal class PlayerInfoDisplay : MonoBehaviour
     {
         internal readonly string Loading = Translator.GetString("Player.Loading");
         internal readonly string PlatformHidden = Translator.GetString("Player.PlatformHidden");
-        internal readonly string NoFriendCode = Translator.GetString("Player.NoFriendCode");
         internal readonly string SickoUser = Translator.GetString("Player.SickoUser");
         internal readonly string AUMUser = Translator.GetString("Player.AUMUser");
         internal readonly string KNUser = Translator.GetString("Player.KNUser");
@@ -167,7 +163,7 @@ internal class PlayerInfoDisplay : MonoBehaviour
         string hashPuid = Utils.GetHashPuid(_player);
         string platform = Utils.GetPlatformName(_player, useTag: true);
 
-        string friendCode = ValidateFriendCode(out string friendCodeColor);
+
 
         if (DataManager.Settings.Gameplay.StreamerMode)
         {
@@ -185,11 +181,10 @@ internal class PlayerInfoDisplay : MonoBehaviour
             _sbTagTop.Append($"<color=#9e9e9e>{platform}</color>+++")
                     .Append($"<color=#ffd829>Lv: {_player.Data.PlayerLevel + 1}</color>+++");
 
-            _sbTagBottom.Append($"<color={friendCodeColor}>{friendCode}</color>+++");
+
         }
         else if ((GameState.IsInGame || GameState.IsFreePlay) && !GameState.IsHideNSeek)
         {
-            SetInGameInfo(_sbTagTop);
         }
 
         if (!_player.IsInShapeshift())
@@ -230,78 +225,6 @@ internal class PlayerInfoDisplay : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Validates and formats the player's friend code.
-    /// </summary>
-    /// <param name="color">Output parameter for the friend code color.</param>
-    /// <returns>The formatted friend code string.</returns>
-    private string ValidateFriendCode(out string color)
-    {
-        color = "#FFFFFF";
-        if (_player?.Data == null) return string.Empty;
-
-        void TryKick()
-        {
-            if (GameState.IsHost && BetterGameSettings.InvalidFriendCode.GetBool())
-            {
-                string kickMessage = string.Format(Translator.GetString("AntiCheat.KickMessage"),
-                    Translator.GetString("AntiCheat.ByAntiCheat"),
-                    Translator.GetString("AntiCheat.Reason.InvalidFriendCode"));
-                _player.Kick(true, kickMessage, true);
-            }
-        }
-
-        string friendCode = _player.Data.FriendCode;
-
-        // Proper friend code validation
-        bool isValidFriendCode = true;
-
-        if (string.IsNullOrEmpty(friendCode))
-        {
-            friendCode = _cachedTranslations.NoFriendCode;
-            color = "#ff0000";
-            isValidFriendCode = false;
-            TryKick();
-        }
-        else
-        {
-            // Check if it matches the basic pattern (alphanumeric and # only)
-            if (!_friendCodePattern.IsMatch(friendCode) || friendCode.Contains(' '))
-            {
-                isValidFriendCode = false;
-                TryKick();
-            }
-            else
-            {
-                // Check if it ends with # followed by exactly 4 digits
-                var hashtagMatch = Regex.Match(friendCode, @"#\d{4}$");
-                if (!hashtagMatch.Success)
-                {
-                    isValidFriendCode = false;
-                    TryKick();
-                }
-                else
-                {
-                    // The part before the # should be reasonable length
-                    string namePart = friendCode[..^5];
-                    if (namePart.Length < 5 || namePart.Length > 10)
-                    {
-                        isValidFriendCode = false;
-                        TryKick();
-                    }
-                }
-            }
-        }
-
-        color = isValidFriendCode ? "#00f7ff" : "#ff0000";
-
-        if (DataManager.Settings.Gameplay.StreamerMode)
-        {
-            friendCode = new string('*', friendCode.Length);
-        }
-
-        return friendCode.Trim();
-    }
 
     /// <summary>
     /// Sets player outline based on data from BetterDataManager.
@@ -388,26 +311,7 @@ internal class PlayerInfoDisplay : MonoBehaviour
     /// </summary>
     /// <param name="sbTagTop">StringBuilder for top tag text.</param>
     [HideFromIl2Cpp]
-    private void SetInGameInfo(StringBuilder sbTagTop)
-    {
-        if (_player.IsImpostorTeammate() || _player.IsLocalPlayer() ||
-            !PlayerControl.LocalPlayer.IsAlive() && !PlayerControl.LocalPlayer.Is(RoleTypes.GuardianAngel))
-        {
-            string roleInfo = _player.GetRoleName().ToColor(_player.Data.Role.TeamColor);
-
-            if (!_player.IsImpostorTeam() && _player.myTasks.Count > 0)
-            {
-                int completedTasks = 0;
-                foreach (var task in _player.Data.Tasks)
-                {
-                    if (task.Complete) completedTasks++;
-                }
-                roleInfo += $" <color=#cbcbcb>({completedTasks}/{_player.Data.Tasks.Count})</color>";
-            }
-
-            sbTagTop.Append(roleInfo + "+++");
-        }
-    }
+    
 
     /// <summary>
     /// Updates player highlight/outline.

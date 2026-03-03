@@ -39,8 +39,8 @@ internal static class OptionsMenuBehaviourPatch
         ClientOptionItem.ClientOptions.Clear();
 
         // Toggle options with config binding
-        ClientOptionItem.CreateToggle(Translator.GetString("BetterOption.AntiCheat"), BAUPlugin.AntiCheat, __instance);
-        ClientOptionItem.CreateToggle(Translator.GetString("BetterOption.SendBetterRpc"), BAUPlugin.SendBetterRpc, __instance, SendBetterRpcAction);
+
+        ClientOptionItem.CreateToggle(Translator.GetString("BetterOption.SendBetterRpc"), BAUPlugin.SendBetterRpc, __instance);
         ClientOptionItem.CreateToggle(Translator.GetString("BetterOption.BetterNotifications"), BAUPlugin.BetterNotifications, __instance, ClearNotifications);
         ClientOptionItem.CreateToggle(Translator.GetString("BetterOption.ForceOwnLanguage"), BAUPlugin.ForceOwnLanguage, __instance);
         ClientOptionItem.CreateToggle(Translator.GetString("BetterOption.ChatDarkMode"), BAUPlugin.ChatDarkMode, __instance, ChatPatch.SetChatTheme);
@@ -84,17 +84,7 @@ internal static class OptionsMenuBehaviourPatch
         SceneChanger.ChangeScene("MainMenu");
     }
 
-    private static void SendBetterRpcAction()
-    {
-        // Resend handshake secret to all other players when option is toggled
-        if (!GameState.IsInGame) return;
 
-        foreach (var player in BAUPlugin.AllPlayerControls)
-        {
-            if (player.IsLocalPlayer()) continue;
-            player.BetterData().HandshakeHandler.ResendSecretToPlayer();
-        }
-    }
 
     private static void ClearNotifications()
     {

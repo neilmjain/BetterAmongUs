@@ -1,4 +1,4 @@
-﻿#pragma warning disable CA2211
+#pragma warning disable CA2211
 
 using BepInEx;
 using BepInEx.Unity.IL2CPP;
@@ -63,21 +63,9 @@ public static class BAUModdedSupportFlags
     // Anti-Cheat System
     // ============================================
 
-    /// <summary>
-    /// Completely disables the anti-cheat system.
-    /// When enabled by another mod, all anti-cheat features will be inactive.
-    /// </summary>
-    public static string Disable_Anticheat = "anticheat.disable";
 
-    /// <summary>
-    /// Prefix for disabling specific RPC handlers or handler flags.
-    /// Format: "anticheat.disable.rpchandler=HandlerClassName" to disable entire handler,
-    /// or "anticheat.disable.rpchandler=HandlerClassName:HandlerFlagName" for specific flags.
-    /// When enabled by another mod, BetterAmongUs will skip the specified RPC validations.
-    /// <seealso cref="AntiCheat.RPCHandler"/> for base handler class.
-    /// <seealso cref="Enums.HandlerFlag"/> for available handler flags.
-    /// </summary>
-    public static string Disable_RPCHandler = "anticheat.disable.rpchandler=";
+
+
 
     // ============================================
     // Command System

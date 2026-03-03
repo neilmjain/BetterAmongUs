@@ -1,6 +1,5 @@
-﻿using BetterAmongUs.Helpers;
+using BetterAmongUs.Helpers;
 using BetterAmongUs.Managers;
-using BetterAmongUs.Modules.AntiCheat;
 using BetterAmongUs.Modules.Support;
 using HarmonyLib;
 using UnityEngine;
@@ -42,7 +41,6 @@ internal static class ModManagerPatch
         }
 
         // Update various BAU systems each frame
-        BetterAntiCheat.Update();
         LateTask.UpdateAll(Time.deltaTime);
         BetterNotificationManager.Update();
     }

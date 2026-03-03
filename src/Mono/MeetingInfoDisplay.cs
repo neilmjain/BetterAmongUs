@@ -1,4 +1,4 @@
-﻿using AmongUs.GameOptions;
+using AmongUs.GameOptions;
 using BetterAmongUs.Data;
 using BetterAmongUs.Helpers;
 using BetterAmongUs.Modules;
@@ -36,12 +36,10 @@ internal sealed class MeetingInfoDisplay : PlayerInfoDisplay
         internal readonly string SickoUser = Translator.GetString("Player.SickoUser");
         internal readonly string AUMUser = Translator.GetString("Player.AUMUser");
         internal readonly string KNUser = Translator.GetString("Player.KNUser");
-        internal readonly string KnownCheater = Translator.GetString("Player.KnownCheater");
+
         internal readonly string DisconnectLeft = Translator.GetString("DisconnectReasonMeeting.Left");
-        internal readonly string DisconnectAntiCheat = Translator.GetString("DisconnectReasonMeeting.AntiCheat");
         internal readonly string DisconnectBanned = Translator.GetString("DisconnectReasonMeeting.Banned");
         internal readonly string DisconnectKicked = Translator.GetString("DisconnectReasonMeeting.Kicked");
-        internal readonly string DisconnectCheater = Translator.GetString("DisconnectReasonMeeting.Cheater");
         internal readonly string DisconnectDefault = Translator.GetString("DisconnectReasonMeeting.Disconnect");
     }
 
@@ -168,8 +166,6 @@ internal sealed class MeetingInfoDisplay : PlayerInfoDisplay
             sbTag.Append($"<color=#4f0000>{_cachedTranslations.AUMUser}</color>+++");
         else if (ContainsPlayerData(BetterDataManager.BetterDataFile.KNData, _player.Data))
             sbTag.Append($"<color=#8731e7>{_cachedTranslations.KNUser}</color>+++");
-        else if (ContainsPlayerData(BetterDataManager.BetterDataFile.CheatData, _player.Data))
-            sbTag.Append($"<color=#fc0000>{_cachedTranslations.KnownCheater}</color>+++");
     }
 
     /// <summary>
@@ -319,11 +315,9 @@ internal sealed class MeetingInfoDisplay : PlayerInfoDisplay
         return betterData?.DisconnectReason switch
         {
             DisconnectReasons.ExitGame => _cachedTranslations.DisconnectLeft,
-            DisconnectReasons.Banned => betterData?.AntiCheatInfo?.BannedByAntiCheat == true
-                ? _cachedTranslations.DisconnectAntiCheat
-                : _cachedTranslations.DisconnectBanned,
+            DisconnectReasons.Banned => _cachedTranslations.DisconnectBanned,
             DisconnectReasons.Kicked => _cachedTranslations.DisconnectKicked,
-            DisconnectReasons.Hacking => _cachedTranslations.DisconnectCheater,
+
             _ => _cachedTranslations.DisconnectDefault
         };
     }

@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
@@ -211,10 +211,7 @@ internal class BAUPlugin : BasePlugin
     /// </summary>
     internal static ConfigEntry<bool>? PrivateOnlyLobby { get; private set; }
 
-    /// <summary>
-    /// Gets or sets the configuration entry for anti-cheat setting.
-    /// </summary>
-    internal static ConfigEntry<bool>? AntiCheat { get; private set; }
+
 
     /// <summary>
     /// Gets or sets the configuration entry for sending Better RPC setting.
@@ -282,7 +279,7 @@ internal class BAUPlugin : BasePlugin
     private void LoadOptions()
     {
         PrivateOnlyLobby = Config.Bind("Mod", "PrivateOnlyLobby", false);
-        AntiCheat = Config.Bind("Better Options", "AntiCheat", true);
+
         SendBetterRpc = Config.Bind("Better Options", "SendBetterRpc", true);
         BetterNotifications = Config.Bind("Better Options", "BetterNotifications", true);
         ForceOwnLanguage = Config.Bind("Better Options", "ForceOwnLanguage", false);
@@ -297,7 +294,7 @@ internal class BAUPlugin : BasePlugin
         SettingsPreset = Config.Bind("Mod", "SettingsPreset", 0);
 
         BAUModdedSupportEvents.InvokeAll_OnBAUConfigEntriesLoaded([
-            PrivateOnlyLobby, AntiCheat, SendBetterRpc,
+            PrivateOnlyLobby, SendBetterRpc,
             BetterNotifications, ForceOwnLanguage, ChatDarkMode,
             ChatInGameplay, LobbyPlayerInfo, DisableLobbyTheme,
             UnlockFPS, ShowFPS, CommandPrefix,
