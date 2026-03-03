@@ -93,7 +93,7 @@ internal sealed class MeetingInfoDisplay : PlayerInfoDisplay
 
         if (_player != null)
         {
-            UpdateInfo();
+            
         }
         else
         {
@@ -137,19 +137,7 @@ internal sealed class MeetingInfoDisplay : PlayerInfoDisplay
     /// <summary>
     /// Updates player information display.
     /// </summary>
-    private void UpdateInfo()
-    {
-        if (_player?.Data == null || _player.BetterData() == null) return;
-
-        SetPlayerTags(_sbTag);
-        FormatPlayerInfo(_sbTag, _sbInfo);
-
-        string roleText = GetRoleText();
-        UpdateNameTextPosition(roleText, _sbInfo.ToString());
-
-        UpdateTextIfChanged(_infoText, _sbInfo.ToString(), ref _lastInfoText);
-        UpdateTextIfChanged(_topText, roleText, ref _lastTopText);
-    }
+    
 
     /// <summary>
     /// Sets player tags based on data from BetterDataManager.
@@ -198,52 +186,14 @@ internal sealed class MeetingInfoDisplay : PlayerInfoDisplay
     /// Gets the role text for display.
     /// </summary>
     /// <returns>Formatted role text.</returns>
-    private string GetRoleText()
-    {
-        if (_player == null) return string.Empty;
-
-        string roleHexColor = _player.IsImpostorTeam() ? "#ff1919" : "#8cffff";
-        string role = $"<color={roleHexColor}>{_player.GetRoleName()}</color>";
-
-        if (!_player.IsImpostorTeam() && _player.myTasks.Count > 0)
-        {
-            int completedTasks = 0;
-            foreach (var task in _player.myTasks)
-            {
-                if (task.IsComplete) completedTasks++;
-            }
-            role += $" <color=#cbcbcb>({completedTasks}/{_player.myTasks.Count})</color>";
-        }
-
-        if (!_player.IsImpostorTeammate())
-        {
-            if ((PlayerControl.LocalPlayer.IsAlive() || PlayerControl.LocalPlayer.Is(RoleTypes.GuardianAngel)) && !_player.IsLocalPlayer())
-            {
-                return string.Empty;
-            }
-        }
-
-        return role;
-    }
+    
 
     /// <summary>
     /// Updates name text position based on role and info text presence.
     /// </summary>
     /// <param name="roleText">The role text.</param>
     /// <param name="infoText">The info text.</param>
-    private void UpdateNameTextPosition(string roleText, string infoText)
-    {
-        bool hasRole = !string.IsNullOrEmpty(roleText);
-        bool hasInfo = !string.IsNullOrEmpty(infoText);
-
-        Vector3 textPos;
-        if (hasRole && hasInfo)
-            textPos = new Vector3(_pva.NameText.transform.localPosition.x, -0.045f);
-        else
-            textPos = new Vector3(_pva.NameText.transform.localPosition.x, 0.015f);
-
-        _pva.NameText.transform.localPosition = textPos;
-    }
+    
 
     /// <summary>
     /// Updates text if changed, optimizing performance.
